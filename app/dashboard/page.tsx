@@ -7,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, X, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 // Mock data - replace with real data from your backend
@@ -23,10 +23,8 @@ const todayQuestion = {
   conArgument: "Prop. 28 will force small businesses to cut jobs, raise prices, or close entirely. The automatic increases remove flexibility during economic downturns. Vote NO to protect small businesses and preserve jobs.",
 };
 
-export default function DashboardHome() {
+function WelcomeBanner() {
   const searchParams = useSearchParams();
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [status, setStatus] = useState<"idle" | "submitted" | "skipped">("idle");
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
 
   useEffect(() => {
@@ -42,6 +40,37 @@ export default function DashboardHome() {
     setShowWelcomeBanner(false);
     localStorage.setItem("welcomeBannerDismissed", "true");
   };
+
+  if (!showWelcomeBanner) return null;
+
+  return (
+    <div className="rounded-lg border border-green-600 dark:border-green-500 bg-green-50 dark:bg-green-950/20 p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <h3 className="font-semibold text-sm mb-1 text-green-900 dark:text-green-100">
+            Welcome to civie!
+          </h3>
+          <p className="text-sm text-green-800 dark:text-green-200 leading-relaxed">
+            Answer today's question to unlock anonymized results tomorrow. Your responses are
+            anonymous, and results are published transparently for everyone to see.
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={dismissBanner}
+          className="h-6 w-6 shrink-0 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardHome() {
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "submitted" | "skipped">("idle");
 
   const handleAnswer = (answer: string) => {
     if (selectedAnswer === answer) {
@@ -64,29 +93,9 @@ export default function DashboardHome() {
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       {/* Welcome Banner */}
-      {showWelcomeBanner && (
-        <div className="rounded-lg border border-green-600 dark:border-green-500 bg-green-50 dark:bg-green-950/20 p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="font-semibold text-sm mb-1 text-green-900 dark:text-green-100">
-                Welcome to civie!
-              </h3>
-              <p className="text-sm text-green-800 dark:text-green-200 leading-relaxed">
-                Answer today's question to unlock anonymized results tomorrow. Your responses are
-                anonymous, and results are published transparently for everyone to see.
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={dismissBanner}
-              className="h-6 w-6 shrink-0 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <Suspense fallback={null}>
+        <WelcomeBanner />
+      </Suspense>
 
       {/* Today's Question */}
       <Card className="shadow-none">
