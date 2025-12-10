@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
-import { CheckCircle2, XCircle } from "lucide-react";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, XCircle, X, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 // Mock data - replace with real data from your backend
 const todayQuestion = {
@@ -22,8 +24,24 @@ const todayQuestion = {
 };
 
 export default function DashboardHome() {
+  const searchParams = useSearchParams();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "submitted" | "skipped">("idle");
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
+
+  useEffect(() => {
+    // Show welcome banner if coming from verification or if it's a new user
+    const welcome = searchParams.get("welcome");
+    const dismissed = localStorage.getItem("welcomeBannerDismissed");
+    if (welcome === "true" && !dismissed) {
+      setShowWelcomeBanner(true);
+    }
+  }, [searchParams]);
+
+  const dismissBanner = () => {
+    setShowWelcomeBanner(false);
+    localStorage.setItem("welcomeBannerDismissed", "true");
+  };
 
   const handleAnswer = (answer: string) => {
     if (selectedAnswer === answer) {
@@ -45,6 +63,31 @@ export default function DashboardHome() {
 
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+      {/* Welcome Banner */}
+      {showWelcomeBanner && (
+        <div className="rounded-lg border border-green-600 dark:border-green-500 bg-green-50 dark:bg-green-950/20 p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm mb-1 text-green-900 dark:text-green-100">
+                Welcome to civie!
+              </h3>
+              <p className="text-sm text-green-800 dark:text-green-200 leading-relaxed">
+                Answer today's question to unlock anonymized results tomorrow. Your responses are
+                anonymous, and results are published transparently for everyone to see.
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={dismissBanner}
+              className="h-6 w-6 shrink-0 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Today's Question */}
       <Card className="shadow-none">
         <CardHeader>
