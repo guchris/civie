@@ -16,7 +16,7 @@ export default function DataPage() {
 
       {/* Transparency Principles */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="shadow-none">
           <CardHeader>
             <div className="flex items-center gap-2 mb-2">
               <Shield className="h-5 w-5 text-primary" />
@@ -27,7 +27,7 @@ export default function DataPage() {
             </CardDescription>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="shadow-none">
           <CardHeader>
             <div className="flex items-center gap-2 mb-2">
               <Database className="h-5 w-5 text-primary" />
@@ -38,7 +38,7 @@ export default function DataPage() {
             </CardDescription>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="shadow-none">
           <CardHeader>
             <div className="flex items-center gap-2 mb-2">
               <BarChart3 className="h-5 w-5 text-primary" />
@@ -52,7 +52,7 @@ export default function DataPage() {
       </div>
 
       {/* Methodology */}
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle>Data Methodology</CardTitle>
           <CardDescription>
@@ -86,7 +86,7 @@ export default function DataPage() {
       </Card>
 
       {/* Available Datasets */}
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle>Available Datasets</CardTitle>
           <CardDescription>
@@ -152,7 +152,7 @@ export default function DataPage() {
       </Card>
 
       {/* Data Schema */}
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle>Data Schema</CardTitle>
           <CardDescription>
@@ -177,7 +177,7 @@ margin_of_error`}
       </Card>
 
       {/* Governance */}
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle>Governance & Oversight</CardTitle>
           <CardDescription>

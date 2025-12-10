@@ -1,157 +1,199 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Clock, Flame } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { useState } from "react";
 
 // Mock data - replace with real data from your backend
 const todayQuestion = {
-  id: "q-2025-12-15",
+  propNumber: "28",
+  title: "Establishes a state minimum wage of $18 per hour by 2026, with annual adjustments thereafter. Initiative statute.",
   date: "December 15, 2025",
-  question: "Should your state increase funding for public transportation infrastructure?",
-  options: [
-    { id: "yes", label: "Yes, increase funding" },
-    { id: "no", label: "No, maintain current levels" },
-    { id: "unsure", label: "Unsure" },
-  ],
-  answered: false,
   timeRemaining: "18 hours left",
-};
-
-const userStats = {
-  streak: 7,
-  totalAnswered: 42,
-  badges: ["7-day streak", "First week"],
+  summary: "Increases the state minimum wage from the current $16 per hour to $18 per hour by January 1, 2026. Requires annual cost-of-living adjustments starting in 2027 based on the Consumer Price Index. Applies to all workers regardless of employer size. Fiscal Impact: Increased state and local government costs potentially in the tens of millions of dollars annually, offset by increased tax revenues.",
+  yesMeaning: "The state minimum wage would increase to $18 per hour by 2026, with automatic annual increases tied to inflation starting in 2027. All workers would be covered regardless of business size.",
+  noMeaning: "The current minimum wage of $16 per hour would remain in effect. Future increases would continue to be determined by the state legislature rather than automatic adjustments.",
+  proArgument: "Proposition 28 ensures workers can keep up with rising costs of living. A higher minimum wage reduces poverty, stimulates local economies as workers spend more, and provides dignity to hardworking families. Vote YES for economic justice.",
+  conArgument: "Prop. 28 will force small businesses to cut jobs, raise prices, or close entirely. The automatic increases remove flexibility during economic downturns. Vote NO to protect small businesses and preserve jobs.",
 };
 
 export default function DashboardHome() {
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "submitted" | "skipped">("idle");
+
+  const handleAnswer = (answer: string) => {
+    if (selectedAnswer === answer) {
+      setSelectedAnswer(null);
+    } else {
+      setSelectedAnswer(answer);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (selectedAnswer && selectedAnswer !== "skip") {
+      setStatus("submitted");
+    }
+  };
+
+  const handleSkip = () => {
+    setStatus("skipped");
+  };
+
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-      {/* Stats Header */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-            <Flame className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userStats.streak} days</div>
-            <p className="text-xs text-muted-foreground">Keep it going!</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Answered</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userStats.totalAnswered}</div>
-            <p className="text-xs text-muted-foreground">Questions answered</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Badges</CardTitle>
-            <Badge variant="secondary">{userStats.badges.length}</Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {userStats.badges.map((badge) => (
-                <Badge key={badge} variant="outline">
-                  {badge}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Today's Question */}
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl">Question of the Day</CardTitle>
-              <CardDescription className="mt-2">
-                {todayQuestion.date} • {todayQuestion.timeRemaining}
-              </CardDescription>
-            </div>
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+          <div className="flex items-center justify-between mb-2">
+            <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+              Question for {todayQuestion.date}
+            </CardDescription>
+            <Badge variant="secondary" className="text-xs">
               {todayQuestion.timeRemaining}
             </Badge>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <p className="text-lg font-medium">{todayQuestion.question}</p>
-          
-          {!todayQuestion.answered ? (
-            <div className="space-y-3">
-              {todayQuestion.options.map((option) => (
-                <Button
-                  key={option.id}
-                  variant="outline"
-                  className="w-full justify-start text-left h-auto py-4"
-                  size="lg"
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-lg border bg-muted p-6 text-center">
-              <CheckCircle2 className="mx-auto h-12 w-12 text-green-500 mb-4" />
-              <p className="font-medium">You've answered today's question!</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Come back tomorrow to see results and answer the next question.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Quick Tips */}
-      <Card>
-        <CardHeader>
-          <CardTitle>How It Works</CardTitle>
-          <CardDescription>
-            Answer today's question to unlock results tomorrow
-          </CardDescription>
+          <CardTitle className="text-base font-semibold leading-tight sm:text-xl lg:text-2xl">
+            {todayQuestion.title}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-              1
-            </div>
-            <div>
-              <p className="font-medium">Answer within 24 hours</p>
-              <p className="text-sm text-muted-foreground">
-                You have until tomorrow at 9 AM to answer today's question.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-              2
-            </div>
-            <div>
-              <p className="font-medium">Unlock results tomorrow</p>
-              <p className="text-sm text-muted-foreground">
-                View anonymized results with demographic breakdowns in History.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-              3
-            </div>
-            <div>
-              <p className="font-medium">Build your streak</p>
-              <p className="text-sm text-muted-foreground">
-                Answer daily to maintain your streak and earn badges.
-              </p>
-            </div>
-          </div>
+          {status === "idle" ? (
+            <>
+              {/* Accordion for additional information */}
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="summary" className="border-none">
+                  <AccordionTrigger className="text-xs font-semibold py-2 sm:text-sm">
+                    Summary
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-2">
+                    <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
+                      {todayQuestion.summary}
+                    </p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="vote-meaning" className="border-none">
+                  <AccordionTrigger className="text-xs font-semibold py-2 sm:text-sm">
+                    What Your Vote Means
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3 pt-2">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="default" className="text-xs">YES</Badge>
+                      </div>
+                      <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
+                        {todayQuestion.yesMeaning}
+                      </p>
+                    </div>
+                    <Separator />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="secondary" className="text-xs">NO</Badge>
+                      </div>
+                      <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
+                        {todayQuestion.noMeaning}
+                      </p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="arguments" className="border-none">
+                  <AccordionTrigger className="text-xs font-semibold py-2 sm:text-sm">
+                    Arguments
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3 pt-2">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="default" className="text-xs">PRO</Badge>
+                      </div>
+                      <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
+                        {todayQuestion.proArgument}
+                      </p>
+                    </div>
+                    <Separator />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="destructive" className="text-xs">CON</Badge>
+                      </div>
+                      <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
+                        {todayQuestion.conArgument}
+                      </p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
+              {/* Answer Buttons */}
+              <div className="flex flex-col gap-2 py-2">
+                <button
+                  onClick={() => handleAnswer("yes")}
+                  className={`w-full rounded-md border px-3 py-2 text-xs font-medium transition-colors text-left sm:px-4 sm:text-sm ${
+                    selectedAnswer === "yes"
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => handleAnswer("no")}
+                  className={`w-full rounded-md border px-3 py-2 text-xs font-medium transition-colors text-left sm:px-4 sm:text-sm ${
+                    selectedAnswer === "no"
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
+                  No
+                </button>
+                <div className="flex gap-2 items-center">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!selectedAnswer || selectedAnswer === "skip"}
+                    className={`flex-1 rounded-md border px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
+                      selectedAnswer && selectedAnswer !== "skip"
+                        ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "border-input bg-background text-muted-foreground cursor-not-allowed opacity-50"
+                    }`}
+                  >
+                    Submit
+                  </button>
+                  <button
+                    onClick={handleSkip}
+                    className="rounded-md border px-3 py-2 text-xs font-medium transition-colors border-input bg-background hover:bg-accent hover:text-accent-foreground sm:px-4 sm:text-sm"
+                  >
+                    Skip
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : status === "submitted" ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <CheckCircle2 className="h-6 w-6 text-green-500" />
+                </EmptyMedia>
+                <EmptyTitle>Response Submitted</EmptyTitle>
+                <EmptyDescription>
+                  You've answered today's question! Come back tomorrow to see results and answer the next question.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <XCircle className="h-6 w-6 text-muted-foreground" />
+                </EmptyMedia>
+                <EmptyTitle>Question Skipped</EmptyTitle>
+                <EmptyDescription>
+                  You've skipped today's question. Come back tomorrow for a new question.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
         </CardContent>
       </Card>
     </div>

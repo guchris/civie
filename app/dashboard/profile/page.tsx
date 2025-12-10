@@ -33,6 +33,51 @@ export default function ProfilePage() {
         </p>
       </div>
 
+      {/* How It Works */}
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle>How It Works</CardTitle>
+          <CardDescription>
+            Answer today's question to unlock results tomorrow
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+              1
+            </div>
+            <div>
+              <p className="font-medium">Answer within 24 hours</p>
+              <p className="text-sm text-muted-foreground">
+                You have until tomorrow at 9 AM to answer today's question.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+              2
+            </div>
+            <div>
+              <p className="font-medium">Unlock results tomorrow</p>
+              <p className="text-sm text-muted-foreground">
+                View anonymized results with demographic breakdowns in History.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+              3
+            </div>
+            <div>
+              <p className="font-medium">Build your streak</p>
+              <p className="text-sm text-muted-foreground">
+                Answer daily to maintain your streak and earn badges.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="identity" className="space-y-6">
         <TabsList>
           <TabsTrigger value="identity">Identity</TabsTrigger>
@@ -41,7 +86,7 @@ export default function ProfilePage() {
         </TabsList>
 
         <TabsContent value="identity" className="space-y-4">
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
@@ -99,7 +144,7 @@ export default function ProfilePage() {
 
         <TabsContent value="stats" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            <Card>
+            <Card className="shadow-none">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
                 <Flame className="h-4 w-4 text-orange-500" />
@@ -109,7 +154,7 @@ export default function ProfilePage() {
                 <p className="text-xs text-muted-foreground">Keep it going!</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="shadow-none">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Answered</CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -119,7 +164,7 @@ export default function ProfilePage() {
                 <p className="text-xs text-muted-foreground">Questions answered</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="shadow-none">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Badges Earned</CardTitle>
                 <Award className="h-4 w-4 text-yellow-500" />
@@ -131,7 +176,7 @@ export default function ProfilePage() {
             </Card>
           </div>
 
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Your Badges</CardTitle>
               <CardDescription>Participation achievements you've earned</CardDescription>
@@ -156,7 +201,7 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
@@ -193,7 +238,7 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
@@ -214,7 +259,7 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-destructive">
+          <Card className="border-destructive shadow-none">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Trash2 className="h-5 w-5 text-destructive" />
