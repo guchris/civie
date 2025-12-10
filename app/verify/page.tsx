@@ -216,8 +216,8 @@ export default function VerifyPage() {
                 </p>
               </div>
 
-              <Button type="submit" className="w-full" disabled={!isFormValid || state !== "form"}>
-                {state === "loading" ? "Verifying..." : "Verify Identity"}
+              <Button type="submit" className="w-full" disabled={!isFormValid}>
+                Verify Identity
               </Button>
             </form>
           </CardContent>
