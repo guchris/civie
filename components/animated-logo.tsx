@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const letters = ["c", "i", "v", "i", "e"];
 
@@ -10,19 +10,14 @@ interface AnimatedLogoProps {
 
 export function AnimatedLogo({ isActive = false }: AnimatedLogoProps) {
   const [animationKey, setAnimationKey] = useState(0);
+  const prevIsActiveRef = useRef(false);
 
   useEffect(() => {
-    if (isActive) {
-      // Initial trigger
+    // Trigger animation when isActive changes from false to true (hover on)
+    if (isActive && !prevIsActiveRef.current) {
       setAnimationKey((prev) => prev + 1);
-      
-      // Set up interval to continuously replay animation while active
-      const interval = setInterval(() => {
-        setAnimationKey((prev) => prev + 1);
-      }, 1100); // Slightly longer than animation duration (0.6s + 0.5s delay = 1.1s)
-
-      return () => clearInterval(interval);
     }
+    prevIsActiveRef.current = isActive;
   }, [isActive]);
 
   return (
