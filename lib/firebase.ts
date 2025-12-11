@@ -2,7 +2,7 @@ import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, Auth, onAuthStateChanged, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 
-// Your Firebase config - you'll need to add your actual config values
+// Firebase configuration from environment variables
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,25 +12,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase lazily to avoid build-time errors
-let app: FirebaseApp | null = null;
-let authInstance: Auth | null = null;
-let dbInstance: Firestore | null = null;
-let googleProviderInstance: GoogleAuthProvider | null = null;
+// Initialize Firebase
+let app: FirebaseApp;
 
-function getApp(): FirebaseApp {
-  // If we already have an app instance, return it
-  if (app) {
-    return app;
-  }
-
-  // Check if Firebase is already initialized
-  const existingApps = getApps();
-  if (existingApps.length > 0) {
-    app = existingApps[0];
-    return app;
-  }
-
+if (getApps().length === 0) {
   // Validate required config values
   if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
     const missing = [];
@@ -38,86 +23,41 @@ function getApp(): FirebaseApp {
     if (!firebaseConfig.authDomain) missing.push("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN");
     if (!firebaseConfig.projectId) missing.push("NEXT_PUBLIC_FIREBASE_PROJECT_ID");
     
-    // During build/SSR (when env vars might not be available), use placeholder config
-    // This allows the build to complete. At runtime, env vars should be set.
-    const isBrowser = typeof window !== "undefined";
-    
-    if (!isBrowser) {
-      // Use placeholder config during build/SSR to allow build to complete
-      // Firebase will be re-initialized at runtime when env vars are available
-      try {
-        app = initializeApp({
-          apiKey: "build-placeholder",
-          authDomain: "build-placeholder",
-          projectId: "build-placeholder",
-          storageBucket: "",
-          messagingSenderId: "",
-          appId: "",
-        }, "[DEFAULT]");
-      } catch (e) {
-        // If initialization fails, try to get existing app
-        const apps = getApps();
-        if (apps.length > 0) {
-          app = apps[0];
-        } else {
-          throw e;
-        }
-      }
-      return app;
-    }
-    
-    // At runtime in browser, throw error if config is missing
-    throw new Error(
-      `Firebase configuration is missing. Missing environment variables: ${missing.join(", ")}. ` +
-      "Please set up your environment variables with Firebase credentials."
-    );
-  }
-  
-  // Check for placeholder values (only at runtime)
-  if (
-    firebaseConfig.apiKey?.includes("your_") ||
-    firebaseConfig.authDomain?.includes("your_") ||
-    firebaseConfig.projectId?.includes("your_")
-  ) {
-    // Only validate at runtime in browser
-    if (typeof window !== "undefined") {
+    // During build time, use placeholder to allow build to complete
+    // At runtime, this will fail if env vars aren't set (which is expected)
+    if (typeof window === "undefined") {
+      app = initializeApp({
+        apiKey: "build-placeholder",
+        authDomain: "build-placeholder",
+        projectId: "build-placeholder",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: "",
+      });
+    } else {
       throw new Error(
-        "Firebase configuration contains placeholder values. Please replace them with your actual Firebase config values."
+        `Firebase configuration is missing. Missing environment variables: ${missing.join(", ")}. ` +
+        "Please set up your environment variables with Firebase credentials."
       );
     }
+  } else {
+    app = initializeApp(firebaseConfig);
   }
-  
-  // Initialize with real config
-  app = initializeApp(firebaseConfig);
-  return app;
+} else {
+  app = getApps()[0];
 }
 
-// Initialize Auth lazily
-export const auth: Auth = (() => {
-  if (!authInstance) {
-    authInstance = getAuth(getApp());
-  }
-  return authInstance;
-})();
+// Initialize Auth
+export const auth: Auth = getAuth(app);
 
-// Initialize Firestore lazily
-export const db: Firestore = (() => {
-  if (!dbInstance) {
-    dbInstance = getFirestore(getApp());
-  }
-  return dbInstance;
-})();
+// Initialize Firestore
+export const db: Firestore = getFirestore(app);
 
 // Initialize Google Auth Provider
-export const googleProvider: GoogleAuthProvider = (() => {
-  if (!googleProviderInstance) {
-    googleProviderInstance = new GoogleAuthProvider();
-  }
-  return googleProviderInstance;
-})();
+export const googleProvider: GoogleAuthProvider = new GoogleAuthProvider();
 
 // Export Firestore utilities
 export { doc, getDoc, setDoc, Timestamp, onAuthStateChanged };
 
-export default getApp();
+export default app;
 
