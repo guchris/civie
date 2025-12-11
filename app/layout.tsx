@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Civie - Your say, every day. Anonymous civic dialogue.",
+  title: "Civie. Your say, every day. Anonymous civic dialogue.",
   description:
     "A daily civic engagement platform that gives you a simple, low-effort way to participate in democratic dialogue. Answer one question each day and unlock anonymized results.",
 };

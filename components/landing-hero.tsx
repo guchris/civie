@@ -50,7 +50,7 @@ export function LandingHero() {
 
   return (
     <section className="container mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-      <div className="grid grid-cols-2 gap-6 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-6 lg:gap-6">
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-6 lg:gap-8">
         {/* Brand Card - Large square */}
         <Card
           className="flex items-center justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-12 md:p-16 lg:p-6 lg:col-span-2 lg:row-span-2 cursor-pointer min-h-[200px] sm:min-h-[250px] lg:min-h-0"
@@ -83,7 +83,7 @@ export function LandingHero() {
         </Card>
 
         {/* Privacy, Theme, and Count Cards - 2x2 grid */}
-        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 lg:gap-2">
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 grid grid-cols-2 grid-rows-2 gap-4 sm:gap-6 lg:gap-8">
           {/* Privacy Card - Top Left */}
           <div className="h-full">
             <PrivacyCard />
