@@ -33,51 +33,26 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
-  const [recaptchaReady, setRecaptchaReady] = useState(false);
 
-  // Initialize reCAPTCHA verifier
+  // Initialize reCAPTCHA verifier - following Firebase documentation pattern
   useEffect(() => {
-    const initializeRecaptcha = async () => {
-      if (typeof window === "undefined" || !recaptchaContainerRef.current) {
-        return;
-      }
+    if (typeof window === "undefined" || !recaptchaContainerRef.current) {
+      return;
+    }
 
-      // Don't re-initialize if already exists
-      if (recaptchaVerifierRef.current) {
-        return;
-      }
-
-      try {
-        // Create new verifier
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-          size: "invisible",
-          callback: () => {
-            // reCAPTCHA solved
-            setRecaptchaReady(true);
-          },
-          "expired-callback": () => {
-            setRecaptchaReady(false);
-            setError("reCAPTCHA expired. Please try again.");
-          },
-        });
-        
-        // Render the reCAPTCHA
-        await recaptchaVerifierRef.current.render();
-        setRecaptchaReady(true);
-      } catch (error: any) {
-        console.error("Error initializing reCAPTCHA:", error);
-        setError("Failed to initialize security verification. Please refresh the page.");
-        setRecaptchaReady(false);
-      }
-    };
-
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      initializeRecaptcha();
-    }, 100);
+    // Create reCAPTCHA verifier - for invisible, no need to call render()
+    recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+      size: "invisible",
+      callback: () => {
+        // reCAPTCHA solved - allow signInWithPhoneNumber
+      },
+      "expired-callback": () => {
+        // Response expired. Ask user to solve reCAPTCHA again.
+        setError("reCAPTCHA expired. Please try again.");
+      },
+    });
 
     return () => {
-      clearTimeout(timer);
       if (recaptchaVerifierRef.current) {
         try {
           recaptchaVerifierRef.current.clear();
@@ -86,26 +61,23 @@ export function LoginForm({
         }
         recaptchaVerifierRef.current = null;
       }
-      setRecaptchaReady(false);
     };
   }, []);
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    // Check if reCAPTCHA is ready
-    if (!recaptchaReady || !recaptchaVerifierRef.current) {
-      setError("Security verification is not ready. Please wait a moment and try again.");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
+      if (!recaptchaVerifierRef.current) {
+        throw new Error("reCAPTCHA verifier not initialized. Please refresh the page.");
+      }
+
       // Format phone number (ensure it starts with +)
       const formattedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+1${phoneNumber.replace(/\D/g, "")}`;
       
+      // signInWithPhoneNumber will automatically trigger reCAPTCHA verification
       const confirmationResult = await signInWithPhoneNumber(
         auth,
         formattedPhone,
@@ -123,54 +95,44 @@ export function LoginForm({
       
       // Provide more specific error messages
       if (error.code === "auth/invalid-app-credential") {
-        setError("App verification failed. Please refresh the page and try again.");
+        setError("App verification failed. Please check your Firebase configuration.");
       } else if (error.code === "auth/captcha-check-failed") {
-        setError("Security verification failed. Please refresh the page and try again.");
+        setError("Security verification failed. Please try again.");
+      } else if (error.code === "auth/invalid-phone-number") {
+        setError("Invalid phone number format. Please enter a valid phone number with country code.");
+      } else if (error.code === "auth/too-many-requests") {
+        setError("Too many requests. Please try again later.");
       } else {
         setError(error.message || "Failed to send verification code. Please try again.");
       }
       
-      // Reset reCAPTCHA on error
-      setRecaptchaReady(false);
-      if (recaptchaVerifierRef.current) {
+      // Clear and re-initialize reCAPTCHA on error
+      if (recaptchaVerifierRef.current && recaptchaContainerRef.current) {
         try {
           recaptchaVerifierRef.current.clear();
-          recaptchaVerifierRef.current = null;
+          recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+            size: "invisible",
+            callback: () => {
+              // reCAPTCHA solved
+            },
+            "expired-callback": () => {
+              setError("reCAPTCHA expired. Please try again.");
+            },
+          });
         } catch (err) {
-          console.error("Error clearing reCAPTCHA:", err);
+          console.error("Error re-initializing reCAPTCHA:", err);
         }
-      }
-      
-      // Re-initialize after a short delay
-      if (recaptchaContainerRef.current) {
-        setTimeout(async () => {
-          try {
-            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
-              size: "invisible",
-              callback: () => setRecaptchaReady(true),
-              "expired-callback": () => {
-                setRecaptchaReady(false);
-                setError("reCAPTCHA expired. Please try again.");
-              },
-            });
-            await recaptchaVerifierRef.current.render();
-            setRecaptchaReady(true);
-          } catch (err) {
-            console.error("Error re-initializing reCAPTCHA:", err);
-          }
-        }, 1000);
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // reCAPTCHA container - must exist in DOM but can be visually hidden
+  // reCAPTCHA container - following Firebase documentation pattern
   const recaptchaContainer = (
     <div 
       ref={recaptchaContainerRef} 
-      id="recaptcha-container" 
-      style={{ position: "absolute", left: "-9999px", visibility: "hidden" }}
+      id="recaptcha-container"
     />
   );
 
