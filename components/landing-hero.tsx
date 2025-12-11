@@ -298,8 +298,8 @@ export function LandingHero() {
           </CardContent>
         </Card>
 
-        {/* Open-Source Data - Clickable Card - Same row as Description on desktop */}
-        <Link href="/dashboard/data" className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-5">
+        {/* Open-Source Data - Clickable Card - Full width on mobile, same row as Description on desktop */}
+        <Link href="/dashboard/data" className="block h-full col-span-2 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-5">
           <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent dark:bg-black cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
             <CardContent className="p-0">
               <span className="text-xl font-semibold sm:text-2xl lg:text-3xl">Open-Source Data</span>
