@@ -33,114 +33,12 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      {/* How It Works */}
-      <Card className="shadow-none">
-        <CardHeader>
-          <CardTitle>How It Works</CardTitle>
-          <CardDescription>
-            Answer today's question to unlock results tomorrow
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-              1
-            </div>
-            <div>
-              <p className="font-medium">Answer within 24 hours</p>
-              <p className="text-sm text-muted-foreground">
-                You have until tomorrow at 9 AM to answer today's question.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-              2
-            </div>
-            <div>
-              <p className="font-medium">Unlock results tomorrow</p>
-              <p className="text-sm text-muted-foreground">
-                View anonymized results with demographic breakdowns in History.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-              3
-            </div>
-            <div>
-              <p className="font-medium">Build your streak</p>
-              <p className="text-sm text-muted-foreground">
-                Answer daily to maintain your streak and earn badges.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Tabs defaultValue="identity" className="space-y-6">
+      <Tabs defaultValue="stats" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="identity">Identity</TabsTrigger>
           <TabsTrigger value="stats">Stats</TabsTrigger>
+          <TabsTrigger value="identity">Identity</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="identity" className="space-y-4">
-          <Card className="shadow-none">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                <CardTitle>Verification Status</CardTitle>
-              </div>
-              <CardDescription>
-                Your identity is verified to ensure data integrity
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Badge variant="default" className="flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Verified
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Verified on December 1, 2025
-                </span>
-              </div>
-              <Separator />
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Birth Date (Immutable)
-                  </label>
-                  <p className="mt-1">{userProfile.birthDate}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This field cannot be changed after verification
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Gender (Immutable)
-                  </label>
-                  <p className="mt-1">{userProfile.gender}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This field cannot be changed after verification
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Zip Code (Editable)</label>
-                  <div className="mt-2 flex items-center gap-2">
-                    <input
-                      type="text"
-                      defaultValue={userProfile.zipCode}
-                      className="flex h-10 w-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                    />
-                    <Button size="sm">Update</Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="stats" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
@@ -195,6 +93,63 @@ export default function ProfilePage() {
                     </div>
                   );
                 })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="identity" className="space-y-4">
+          <Card className="shadow-none">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                <CardTitle>Verification Status</CardTitle>
+              </div>
+              <CardDescription>
+                Your identity is verified to ensure data integrity
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="default" className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Verified
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  on December 1, 2025
+                </span>
+              </div>
+              <Separator />
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Birth Date
+                  </label>
+                  <p className="mt-1">{userProfile.birthDate}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This field cannot be changed after verification
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Gender
+                  </label>
+                  <p className="mt-1">{userProfile.gender}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This field cannot be changed after verification
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Zip Code</label>
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="text"
+                      defaultValue={userProfile.zipCode}
+                      className="flex h-10 w-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                    />
+                    <Button size="sm">Update</Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

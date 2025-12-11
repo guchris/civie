@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, History, Database } from "lucide-react";
+import { Home, History, Database, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/history", label: "History", icon: History },
   { href: "/dashboard/data", label: "Data", icon: Database },
+  { href: "/dashboard/profile", label: "Profile", icon: User },
 ];
 
 export function DashboardNav() {
@@ -45,19 +45,6 @@ export function DashboardNav() {
               </Link>
             );
           })}
-          <Link
-            href="/dashboard/profile"
-            className={cn(
-              "ml-2 rounded-full transition-colors",
-              pathname === "/dashboard/profile" || pathname?.startsWith("/dashboard/profile/")
-                ? "ring-2 ring-primary"
-                : "hover:ring-2 hover:ring-accent"
-            )}
-          >
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="text-xs">C</AvatarFallback>
-            </Avatar>
-          </Link>
         </div>
       </div>
     </nav>
