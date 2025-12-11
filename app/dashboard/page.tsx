@@ -213,7 +213,7 @@ export default function DashboardHome() {
                 </EmptyDescription>
               </EmptyHeader>
               <div className="mt-6">
-                <Button asChild>
+                <Button asChild variant="secondary">
                   <Link href="/dashboard/history">View History</Link>
                 </Button>
               </div>
@@ -230,7 +230,7 @@ export default function DashboardHome() {
                 </EmptyDescription>
               </EmptyHeader>
               <div className="mt-6">
-                <Button asChild>
+                <Button asChild variant="secondary">
                   <Link href="/dashboard/history">View History</Link>
                 </Button>
               </div>
