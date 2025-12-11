@@ -132,7 +132,7 @@ function AuthCallbackContent() {
             </CardDescription>
             <div className="flex flex-col gap-2">
               <Button asChild>
-                <Link href="/signup">Request New Link</Link>
+                <Link href="/login">Go to Login</Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link href="/">Go Home</Link>

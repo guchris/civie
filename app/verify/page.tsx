@@ -51,8 +51,8 @@ export default function VerifyPage() {
           console.error("Error checking verification status:", error);
         }
       } else {
-        // Redirect to signup if not authenticated
-        router.push("/signup");
+        // Redirect to login if not authenticated
+        router.push("/login");
       }
       setIsCheckingAuth(false);
     });
