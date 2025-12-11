@@ -27,6 +27,7 @@ export default function VerifyPage() {
   const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
   const [zipCode, setZipCode] = useState("");
+  const [raceEthnicity, setRaceEthnicity] = useState("");
   const [state, setState] = useState<VerificationState>("form");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -76,6 +77,7 @@ export default function VerifyPage() {
         birthDate,
         gender,
         zipCode,
+        raceEthnicity,
         verified: true,
         verifiedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
@@ -100,7 +102,7 @@ export default function VerifyPage() {
 
 
   // Check if all required fields are filled
-  const isFormValid = fullName.trim() && birthDate && gender && zipCode.length === 5;
+  const isFormValid = fullName.trim() && birthDate && gender && zipCode.length === 5 && raceEthnicity;
 
   // Show loading while checking authentication
   if (isCheckingAuth) {
@@ -223,6 +225,30 @@ export default function VerifyPage() {
                 </Select>
                 <p className="text-xs text-muted-foreground">
                   This field cannot be changed after verification
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="raceEthnicity">Race/Ethnicity</Label>
+                <Select value={raceEthnicity} onValueChange={setRaceEthnicity} required>
+                  <SelectTrigger id="raceEthnicity">
+                    <SelectValue placeholder="Select race/ethnicity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="american-indian-alaska-native">American Indian or Alaska Native</SelectItem>
+                    <SelectItem value="asian">Asian</SelectItem>
+                    <SelectItem value="black-african-american">Black or African American</SelectItem>
+                    <SelectItem value="hispanic-latino">Hispanic or Latino</SelectItem>
+                    <SelectItem value="middle-eastern-north-african">Middle Eastern or North African</SelectItem>
+                    <SelectItem value="native-hawaiian-pacific-islander">Native Hawaiian or Other Pacific Islander</SelectItem>
+                    <SelectItem value="white">White</SelectItem>
+                    <SelectItem value="multiracial">Multiracial</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Used for demographic analysis. Can be updated later.
                 </p>
               </div>
 
