@@ -33,33 +33,51 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
+  const [recaptchaReady, setRecaptchaReady] = useState(false);
 
   // Initialize reCAPTCHA verifier
   useEffect(() => {
-    if (typeof window !== "undefined" && !recaptchaVerifierRef.current && recaptchaContainerRef.current) {
+    const initializeRecaptcha = async () => {
+      if (typeof window === "undefined" || !recaptchaContainerRef.current) {
+        return;
+      }
+
+      // Don't re-initialize if already exists
+      if (recaptchaVerifierRef.current) {
+        return;
+      }
+
       try {
+        // Create new verifier
         recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
           size: "invisible",
           callback: () => {
-            // reCAPTCHA solved, allow phone number sign-in
+            // reCAPTCHA solved
+            setRecaptchaReady(true);
           },
           "expired-callback": () => {
+            setRecaptchaReady(false);
             setError("reCAPTCHA expired. Please try again.");
           },
         });
         
         // Render the reCAPTCHA
-        recaptchaVerifierRef.current.render().catch((error: any) => {
-          console.error("Error rendering reCAPTCHA:", error);
-          setError("Failed to initialize security verification. Please refresh the page.");
-        });
+        await recaptchaVerifierRef.current.render();
+        setRecaptchaReady(true);
       } catch (error: any) {
-        console.error("Error creating reCAPTCHA verifier:", error);
+        console.error("Error initializing reCAPTCHA:", error);
         setError("Failed to initialize security verification. Please refresh the page.");
+        setRecaptchaReady(false);
       }
-    }
+    };
+
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      initializeRecaptcha();
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (recaptchaVerifierRef.current) {
         try {
           recaptchaVerifierRef.current.clear();
@@ -68,33 +86,23 @@ export function LoginForm({
         }
         recaptchaVerifierRef.current = null;
       }
+      setRecaptchaReady(false);
     };
   }, []);
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Check if reCAPTCHA is ready
+    if (!recaptchaReady || !recaptchaVerifierRef.current) {
+      setError("Security verification is not ready. Please wait a moment and try again.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      if (!recaptchaVerifierRef.current) {
-        // Try to initialize if not already done
-        if (recaptchaContainerRef.current) {
-          recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-            size: "invisible",
-            callback: () => {
-              // reCAPTCHA solved
-            },
-            "expired-callback": () => {
-              setError("reCAPTCHA expired. Please try again.");
-            },
-          });
-          await recaptchaVerifierRef.current.render();
-        } else {
-          throw new Error("reCAPTCHA verifier not initialized. Please refresh the page.");
-        }
-      }
-
       // Format phone number (ensure it starts with +)
       const formattedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+1${phoneNumber.replace(/\D/g, "")}`;
       
@@ -123,26 +131,48 @@ export function LoginForm({
       }
       
       // Reset reCAPTCHA on error
-      if (recaptchaVerifierRef.current && recaptchaContainerRef.current) {
+      setRecaptchaReady(false);
+      if (recaptchaVerifierRef.current) {
         try {
           recaptchaVerifierRef.current.clear();
-          recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-            size: "invisible",
-          });
-          recaptchaVerifierRef.current.render().catch((err: any) => {
-            console.error("Error re-rendering reCAPTCHA:", err);
-          });
+          recaptchaVerifierRef.current = null;
         } catch (err) {
-          console.error("Error resetting reCAPTCHA:", err);
+          console.error("Error clearing reCAPTCHA:", err);
         }
+      }
+      
+      // Re-initialize after a short delay
+      if (recaptchaContainerRef.current) {
+        setTimeout(async () => {
+          try {
+            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current!, {
+              size: "invisible",
+              callback: () => setRecaptchaReady(true),
+              "expired-callback": () => {
+                setRecaptchaReady(false);
+                setError("reCAPTCHA expired. Please try again.");
+              },
+            });
+            await recaptchaVerifierRef.current.render();
+            setRecaptchaReady(true);
+          } catch (err) {
+            console.error("Error re-initializing reCAPTCHA:", err);
+          }
+        }, 1000);
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Hidden reCAPTCHA container
-  const recaptchaContainer = <div ref={recaptchaContainerRef} id="recaptcha-container" className="hidden" />;
+  // reCAPTCHA container - must exist in DOM but can be visually hidden
+  const recaptchaContainer = (
+    <div 
+      ref={recaptchaContainerRef} 
+      id="recaptcha-container" 
+      style={{ position: "absolute", left: "-9999px", visibility: "hidden" }}
+    />
+  );
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
