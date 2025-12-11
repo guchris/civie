@@ -4,13 +4,13 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ArrowRight, ArrowUpRight, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CheckCircle2, XCircle, Check } from "lucide-react";
 import { ThemeToggleCard } from "@/components/theme-toggle-card";
 import { PrivacyCard } from "@/components/privacy-card";
 import { ParticipantCountCard } from "@/components/participant-count-card";
 import { AnimatedLogo } from "@/components/animated-logo";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const exampleQuestion = {
@@ -134,43 +134,32 @@ export function LandingHero() {
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-2">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="default" className="text-xs">YES</Badge>
-                        </div>
+                        <p className="text-xs font-medium mb-1 sm:text-sm">YES</p>
                         <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
                           {exampleQuestion.yesMeaning}
                         </p>
                       </div>
-                      <Separator />
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="secondary" className="text-xs">NO</Badge>
-                        </div>
+                        <p className="text-xs font-medium mb-1 sm:text-sm">NO</p>
                         <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
                           {exampleQuestion.noMeaning}
                         </p>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-
                   <AccordionItem value="arguments" className="border-none">
                     <AccordionTrigger className="text-xs font-semibold py-2 sm:text-sm">
                       Arguments
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3 pt-2">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="default" className="text-xs">PRO</Badge>
-                        </div>
+                        <p className="text-xs font-medium mb-1 sm:text-sm">PRO</p>
                         <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
                           {exampleQuestion.proArgument}
                         </p>
                       </div>
-                      <Separator />
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="destructive" className="text-xs">CON</Badge>
-                        </div>
+                        <p className="text-xs font-medium mb-1 sm:text-sm">CON</p>
                         <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
                           {exampleQuestion.conArgument}
                         </p>
@@ -183,23 +172,41 @@ export function LandingHero() {
                 <div className="flex flex-col gap-2 py-2">
                   <button
                     onClick={() => handleAnswer("yes")}
-                    className={`w-full rounded-md border px-3 py-2 text-xs font-medium transition-colors text-left sm:px-4 sm:text-sm ${
+                    className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm ${
                       selectedAnswer === "yes"
-                        ? "border-accent bg-accent text-accent-foreground"
+                        ? "border-accent text-accent-foreground scale-[1.02]"
                         : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
                     }`}
                   >
-                    Yes
+                    {selectedAnswer === "yes" && (
+                      <>
+                        <div className="absolute inset-0 bg-accent origin-left animate-[fill_0.3s_ease-out_forwards]" />
+                        <div className="relative flex items-center gap-2">
+                          <Check className="h-4 w-4 animate-[fadeIn_0.3s_ease-out]" />
+                          <span>Yes</span>
+                        </div>
+                      </>
+                    )}
+                    {selectedAnswer !== "yes" && <span>Yes</span>}
                   </button>
                   <button
                     onClick={() => handleAnswer("no")}
-                    className={`w-full rounded-md border px-3 py-2 text-xs font-medium transition-colors text-left sm:px-4 sm:text-sm ${
+                    className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm ${
                       selectedAnswer === "no"
-                        ? "border-accent bg-accent text-accent-foreground"
+                        ? "border-accent text-accent-foreground scale-[1.02]"
                         : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
                     }`}
                   >
-                    No
+                    {selectedAnswer === "no" && (
+                      <>
+                        <div className="absolute inset-0 bg-accent origin-left animate-[fill_0.3s_ease-out_forwards]" />
+                        <div className="relative flex items-center gap-2">
+                          <Check className="h-4 w-4 animate-[fadeIn_0.3s_ease-out]" />
+                          <span>No</span>
+                        </div>
+                      </>
+                    )}
+                    {selectedAnswer !== "no" && <span>No</span>}
                   </button>
                   <div className="flex gap-2 items-center">
                     <button
@@ -233,6 +240,11 @@ export function LandingHero() {
                     You've answered today's question! Come back tomorrow to see results and answer the next question.
                   </EmptyDescription>
                 </EmptyHeader>
+                <div className="mt-6">
+                  <Button asChild variant="secondary">
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </div>
               </Empty>
             ) : (
               <Empty>
@@ -245,6 +257,11 @@ export function LandingHero() {
                     You've skipped today's question. Come back tomorrow for a new question.
                   </EmptyDescription>
                 </EmptyHeader>
+                <div className="mt-6">
+                  <Button asChild variant="secondary">
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </div>
               </Empty>
             )}
           </CardContent>
