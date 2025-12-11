@@ -74,10 +74,10 @@ export function LandingHero() {
         </Card>
 
         {/* Anonymous Dialogue Card - Medium */}
-        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-1 sm:col-span-1 sm:p-10 md:p-12 lg:p-6 lg:col-span-1 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0">
+        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-1 sm:col-span-1 sm:p-10 md:p-12 lg:p-6 lg:col-span-1 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group">
           <CardContent className="p-0">
             <p className="text-lg font-bold sm:text-2xl">
-              Anonymous civic dialogue.
+              <span className="transition-all duration-300 group-hover:blur-[2px]">Anonymous</span> civic dialogue.
             </p>
           </CardContent>
         </Card>
