@@ -59,5 +59,17 @@ export const googleProvider: GoogleAuthProvider = new GoogleAuthProvider();
 // Export Firestore utilities
 export { doc, getDoc, setDoc, Timestamp, onAuthStateChanged };
 
+// Helper function to get the base URL for action links
+// Uses environment variable if set, otherwise uses civie.org
+export function getActionCodeUrl(path: string = "/auth/callback"): string {
+  // Use environment variable if set, otherwise default to civie.org
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://civie.org";
+  
+  // Ensure path starts with /
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  
+  return `${baseUrl}${cleanPath}`;
+}
+
 export default app;
 

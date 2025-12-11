@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithPopup } from "firebase/auth";
-import { auth, db, googleProvider, doc, getDoc } from "@/lib/firebase";
+import { auth, db, googleProvider, doc, getDoc, getActionCodeUrl } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -33,16 +33,15 @@ export function SignupForm({
     setError(null);
     setIsLoading(true);
 
+    const continueUrl = getActionCodeUrl("/auth/callback");
+
     try {
-      // Get the current URL for the action link
       const actionCodeSettings = {
-        // URL you want to redirect back to after email verification
-        url: `${window.location.origin}/auth/callback`,
+        url: continueUrl,
         handleCodeInApp: true,
       };
 
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      // Store email in localStorage for the callback page
       window.localStorage.setItem("emailForSignIn", email);
       setEmailSent(true);
     } catch (error: any) {
@@ -61,17 +60,9 @@ export function SignupForm({
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // Check if user is already verified
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists() && userDocSnap.data().verified) {
-        // User is already verified, redirect to dashboard
-        router.push("/dashboard");
-      } else {
-        // User is not verified yet, redirect to verification page
-        router.push("/verify");
-      }
+      // Always redirect to verify first for new sign-ups
+      // The verify page will check if user is already verified and redirect accordingly
+      router.push("/verify");
     } catch (error: any) {
       console.error("Error signing in with Google:", error);
       setError(error.message || "Failed to sign in with Google. Please try again.");

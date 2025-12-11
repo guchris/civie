@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sendSignInLinkToEmail, signInWithPopup } from "firebase/auth";
-import { auth, db, googleProvider, doc, getDoc } from "@/lib/firebase";
+import { auth, db, googleProvider, doc, getDoc, getActionCodeUrl } from "@/lib/firebase";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,16 +33,15 @@ export function LoginForm({
     setError(null);
     setIsLoading(true);
 
+    const continueUrl = getActionCodeUrl("/auth/callback");
+
     try {
-      // Get the current URL for the action link
       const actionCodeSettings = {
-        // URL you want to redirect back to after email verification
-        url: `${window.location.origin}/auth/callback`,
+        url: continueUrl,
         handleCodeInApp: true,
       };
 
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      // Store email in localStorage for the callback page
       window.localStorage.setItem("emailForSignIn", email);
       setEmailSent(true);
     } catch (error: any) {
