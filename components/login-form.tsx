@@ -1,23 +1,93 @@
-import Link from "next/link"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { useState } from "react";
+import { sendSignInLinkToEmail } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      // Get the current URL for the action link
+      const actionCodeSettings = {
+        // URL you want to redirect back to after email verification
+        url: `${window.location.origin}/auth/callback`,
+        handleCodeInApp: true,
+      };
+
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      // Store email in localStorage for the callback page
+      window.localStorage.setItem("emailForSignIn", email);
+      setEmailSent(true);
+    } catch (error: any) {
+      console.error("Error sending email link:", error);
+      setError(error.message || "Failed to send email. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (emailSent) {
+    return (
+      <div className={cn("flex flex-col gap-6", className)} {...props}>
+        <FieldGroup>
+          <div className="flex flex-col items-center gap-2 text-center">
+            <Link
+              href="/"
+              className="flex flex-col items-center gap-2 font-medium"
+            >
+              <span className="text-2xl font-bold">civie</span>
+            </Link>
+            <h1 className="text-xl font-bold">Check your email</h1>
+            <FieldDescription>
+              We sent a sign-in link to <strong>{email}</strong>
+            </FieldDescription>
+            <FieldDescription>
+              Click the link in the email to sign in. The link will expire in 1 hour.
+            </FieldDescription>
+          </div>
+          <Field>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEmailSent(false);
+                setEmail("");
+              }}
+            >
+              Use a different email
+            </Button>
+          </Field>
+        </FieldGroup>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form>
+      <form onSubmit={handleEmailSubmit}>
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
             <Link
@@ -37,11 +107,20 @@ export function LoginForm({
               id="email"
               type="email"
               placeholder="m@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </Field>
+          {error && (
+            <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
           <Field>
-            <Button type="submit">Login</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Sending..." : "Login"}
+            </Button>
           </Field>
           <FieldSeparator>Or</FieldSeparator>
           <Field className="grid gap-4 sm:grid-cols-2">

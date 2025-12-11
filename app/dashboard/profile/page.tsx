@@ -1,19 +1,30 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Shield, Flame, Award, Settings, Bell, Trash2 } from "lucide-react";
+import { CheckCircle2, Shield, Flame, Award, Settings, Bell, Trash2, Loader2, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { format } from "date-fns";
 
-// Mock data - replace with real data from your backend
-const userProfile = {
-  verified: true,
-  birthDate: "January 1, 1990",
-  gender: "Prefer not to say",
-  zipCode: "10001",
-  email: "user@example.com",
-};
+// User data type
+interface UserData {
+  fullName?: string;
+  birthDate?: string;
+  gender?: string;
+  zipCode?: string;
+  verified?: boolean;
+  verifiedAt?: string;
+  email?: string;
+}
 
+// Mock stats - replace with real data from your backend
 const userStats = {
   streak: 7,
   totalAnswered: 42,
@@ -24,6 +35,137 @@ const userStats = {
 };
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [editingZipCode, setEditingZipCode] = useState(false);
+  const [zipCodeValue, setZipCodeValue] = useState("");
+  const [savingZipCode, setSavingZipCode] = useState(false);
+
+  // Fetch user data from Firestore
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        try {
+          // Fetch user data from Firestore
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            setUserData({
+              ...data,
+              email: user.email || undefined,
+            } as UserData);
+            setZipCodeValue(data.zipCode || "");
+          } else {
+            // User document doesn't exist yet (shouldn't happen if they completed verification)
+            setUserData({
+              email: user.email || undefined,
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Not authenticated, redirect to login
+        router.push("/login");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  const handleUpdateZipCode = async () => {
+    if (!isAuthenticated || !auth.currentUser) return;
+
+    setSavingZipCode(true);
+    try {
+      const user = auth.currentUser;
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          zipCode: zipCodeValue,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
+      // Update local state
+      setUserData((prev) => ({
+        ...prev,
+        zipCode: zipCodeValue,
+      }));
+
+      setEditingZipCode(false);
+    } catch (error) {
+      console.error("Error updating zip code:", error);
+      alert("Failed to update zip code. Please try again.");
+    } finally {
+      setSavingZipCode(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      alert("Failed to sign out. Please try again.");
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      return format(date, "MMMM d, yyyy");
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Format birth date for display
+  const formatBirthDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      return format(date, "MMMM d, yyyy");
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Format gender for display
+  const formatGender = (gender?: string) => {
+    if (!gender) return "N/A";
+    const genderMap: Record<string, string> = {
+      male: "Male",
+      female: "Female",
+      "non-binary": "Non-binary",
+      "prefer-not-to-say": "Prefer not to say",
+    };
+    return genderMap[gender] || gender;
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       <div>
@@ -111,21 +253,45 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2">
-                <Badge variant="default" className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Verified
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  on December 1, 2025
-                </span>
+                {userData?.verified ? (
+                  <>
+                    <Badge variant="default" className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Verified
+                    </Badge>
+                    {userData.verifiedAt && (
+                      <span className="text-sm text-muted-foreground">
+                        on {formatDate(userData.verifiedAt)}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <Badge variant="secondary">Not Verified</Badge>
+                )}
               </div>
               <Separator />
               <div className="space-y-4">
+                {userData?.fullName && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Full Name
+                    </label>
+                    <p className="mt-1">{userData.fullName}</p>
+                  </div>
+                )}
+                {userData?.email && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Email
+                    </label>
+                    <p className="mt-1">{userData.email}</p>
+                  </div>
+                )}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">
                     Birth Date
                   </label>
-                  <p className="mt-1">{userProfile.birthDate}</p>
+                  <p className="mt-1">{formatBirthDate(userData?.birthDate)}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     This field cannot be changed after verification
                   </p>
@@ -134,7 +300,7 @@ export default function ProfilePage() {
                   <label className="text-sm font-medium text-muted-foreground">
                     Gender
                   </label>
-                  <p className="mt-1">{userProfile.gender}</p>
+                  <p className="mt-1">{formatGender(userData?.gender)}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     This field cannot be changed after verification
                   </p>
@@ -142,13 +308,63 @@ export default function ProfilePage() {
                 <div>
                   <label className="text-sm font-medium">Zip Code</label>
                   <div className="mt-2 flex items-center gap-2">
-                    <input
-                      type="text"
-                      defaultValue={userProfile.zipCode}
-                      className="flex h-10 w-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                    />
-                    <Button size="sm">Update</Button>
+                    {editingZipCode ? (
+                      <>
+                        <Input
+                          type="text"
+                          value={zipCodeValue}
+                          onChange={(e) => setZipCodeValue(e.target.value)}
+                          placeholder="10001"
+                          maxLength={5}
+                          pattern="[0-9]{5}"
+                          className="w-32"
+                          disabled={savingZipCode}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={handleUpdateZipCode}
+                          disabled={savingZipCode || zipCodeValue.length !== 5}
+                        >
+                          {savingZipCode ? (
+                            <>
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            "Save"
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingZipCode(false);
+                            setZipCodeValue(userData?.zipCode || "");
+                          }}
+                          disabled={savingZipCode}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <p className="mt-1">{userData?.zipCode || "Not set"}</p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingZipCode(true);
+                            setZipCodeValue(userData?.zipCode || "");
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </>
+                    )}
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Used for demographic analysis. Can be updated later.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -210,6 +426,27 @@ export default function ProfilePage() {
               </p>
               <Button variant="outline" size="sm">
                 Learn More
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-none">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <LogOut className="h-5 w-5" />
+                <CardTitle>Sign Out</CardTitle>
+              </div>
+              <CardDescription>
+                Sign out of your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                You can sign back in at any time using your email.
+              </p>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
               </Button>
             </CardContent>
           </Card>

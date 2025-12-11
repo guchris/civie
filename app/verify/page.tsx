@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Shield, Upload, CheckCircle2, Loader2 } from "lucide-react";
+import { Shield, CheckCircle2, Loader2 } from "lucide-react";
 
 type VerificationState = "form" | "loading" | "success";
 
@@ -24,32 +27,96 @@ export default function VerifyPage() {
   const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
   const [zipCode, setZipCode] = useState("");
-  const [idFile, setIdFile] = useState<File | null>(null);
   const [state, setState] = useState<VerificationState>("form");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check if user is authenticated and already verified
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        
+        // Check if user is already verified
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          
+          if (userDocSnap.exists() && userDocSnap.data().verified) {
+            // User is already verified, redirect to dashboard
+            router.push("/dashboard");
+            return;
+          }
+        } catch (error) {
+          console.error("Error checking verification status:", error);
+        }
+      } else {
+        // Redirect to signup if not authenticated
+        router.push("/signup");
+      }
+      setIsCheckingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setState("loading");
 
-    // Simulate verification process
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
 
-    setState("success");
+      // Save user identity data to Firestore
+      const userData = {
+        fullName,
+        birthDate,
+        gender,
+        zipCode,
+        verified: true,
+        verifiedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    // Redirect to dashboard after showing success
-    setTimeout(() => {
-      router.push("/dashboard?welcome=true");
-    }, 2000);
-  };
+      await setDoc(doc(db, "users", user.uid), userData, { merge: true });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setIdFile(e.target.files[0]);
+      setState("success");
+
+      // Redirect to dashboard after showing success
+      setTimeout(() => {
+        router.push("/dashboard?welcome=true");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Error saving verification data:", error);
+      setState("form");
+      // You might want to show an error message to the user here
+      alert(`Error: ${error.message || "Failed to save verification data. Please try again."}`);
     }
   };
 
+
   // Check if all required fields are filled
-  const isFormValid = fullName.trim() && birthDate && gender && zipCode.length === 5 && idFile !== null;
+  const isFormValid = fullName.trim() && birthDate && gender && zipCode.length === 5;
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="container mx-auto max-w-7xl flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md">
+          <Card className="shadow-none">
+            <CardContent className="p-12 text-center">
+              <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+              <CardTitle className="text-2xl mb-2">Loading...</CardTitle>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (state === "loading") {
     return (
@@ -173,38 +240,6 @@ export default function VerifyPage() {
                 />
                 <p className="text-xs text-muted-foreground">
                   Used for demographic analysis. Can be updated later.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="idUpload">Government-Issued ID</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="idUpload"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    required
-                  />
-                  <Label
-                    htmlFor="idUpload"
-                    className="flex flex-1 items-center justify-center gap-2 rounded-md border border-dashed px-4 py-8 cursor-pointer hover:bg-accent transition-colors"
-                  >
-                    <Upload className="h-5 w-5 text-muted-foreground" />
-                    <div className="text-center">
-                      <p className="text-sm font-medium">
-                        {idFile ? idFile.name : "Click to upload ID"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        PDF, PNG, or JPG (max 10MB)
-                      </p>
-                    </div>
-                  </Label>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Your ID is used for verification only. We extract immutable fields (birth date,
-                  gender) but never store your ID image.
                 </p>
               </div>
 
