@@ -65,10 +65,11 @@ export function LandingHero() {
         </Card>
 
         {/* Main Headline Card - Wide */}
-        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 lg:p-6 lg:col-span-2 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0">
+        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 lg:p-6 lg:col-span-2 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group">
           <CardContent className="p-0">
-            <h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
+            <h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl relative inline-block">
               Your say, every day.
+              <span className="absolute bottom-0 left-0 w-0 h-1 bg-foreground transition-all duration-500 ease-out group-hover:w-full"></span>
             </h2>
           </CardContent>
         </Card>
@@ -82,21 +83,15 @@ export function LandingHero() {
           </CardContent>
         </Card>
 
-        {/* Privacy, Theme, and Count Cards - 2x2 grid */}
-        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 grid grid-cols-2 grid-rows-2 gap-4 sm:gap-6 lg:gap-8">
-          {/* Privacy Card - Top Left */}
-          <div className="h-full">
-            <PrivacyCard />
-          </div>
-          {/* Theme Toggle Card - Top Right */}
-          <div className="h-full">
-            <ThemeToggleCard />
-          </div>
-          {/* Participant Count Card - Bottom, spans both columns */}
-          <div className="h-full col-span-2">
-            <ParticipantCountCard />
-          </div>
-        </div>
+        {/* Login Card - Replaces Privacy/Theme position */}
+        <Link href="/login" className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1">
+          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent dark:bg-black cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
+            <CardContent className="p-0">
+              <span className="text-xl font-bold sm:text-2xl lg:text-3xl">Login</span>
+              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7" />
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Example Question Card - Large wide */}
         <Card className="flex flex-col shadow-none dark:bg-black col-span-2 sm:col-span-2 lg:col-span-3 lg:row-span-2 min-h-[250px] sm:min-h-[300px] lg:min-h-0">
@@ -267,15 +262,22 @@ export function LandingHero() {
           </CardContent>
         </Card>
 
-        {/* Login - Clickable Card - Half Height on Desktop */}
-        <Link href="/login" className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-3">
-          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent dark:bg-black cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
-            <CardContent className="p-0">
-              <span className="text-xl font-semibold sm:text-2xl lg:text-3xl">Login</span>
-              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7" />
-            </CardContent>
-          </Card>
-        </Link>
+        {/* Privacy, Theme Cards - Moved to where Login was */}
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-3 grid grid-cols-2 grid-rows-1 gap-4 sm:gap-6 lg:gap-8">
+          {/* Privacy Card */}
+          <div className="h-full">
+            <PrivacyCard />
+          </div>
+          {/* Theme Toggle Card */}
+          <div className="h-full">
+            <ThemeToggleCard />
+          </div>
+        </div>
+
+        {/* Participant Count Card - Moved to new location */}
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-4">
+          <ParticipantCountCard />
+        </div>
 
 
         {/* Description Card - Medium */}
