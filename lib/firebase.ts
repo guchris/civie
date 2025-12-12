@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, Auth, onAuthStateChanged, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import { getFirestore, Firestore, doc, getDoc, setDoc, Timestamp, collection, addDoc, getDocs, query, where, orderBy } from "firebase/firestore";
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -57,8 +57,7 @@ export const db: Firestore = getFirestore(app);
 export const googleProvider: GoogleAuthProvider = new GoogleAuthProvider();
 
 // Export Firestore utilities
-export { doc, getDoc, setDoc, Timestamp, onAuthStateChanged };
-export { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+export { doc, getDoc, setDoc, Timestamp, onAuthStateChanged, collection, addDoc, getDocs, query, where, orderBy };
 
 // Helper function to get the base URL for action links
 // Uses environment variable if set, otherwise uses civie.org

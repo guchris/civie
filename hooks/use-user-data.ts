@@ -5,14 +5,22 @@ import { useRouter } from "next/navigation";
 import { auth, db, doc, getDoc, onAuthStateChanged } from "@/lib/firebase";
 import { User } from "firebase/auth";
 
+export interface UserAnswer {
+  status: "answered" | "skipped";
+  answerOptionId?: string;
+  timestamp: string;
+}
+
 export interface UserData {
   fullName?: string;
   birthDate?: string;
   gender?: string;
   zipCode?: string;
+  raceEthnicity?: string;
   verified?: boolean;
   verifiedAt?: string;
   email?: string;
+  answers?: Record<string, UserAnswer>; // date -> answer mapping
 }
 
 export function useUserData() {
