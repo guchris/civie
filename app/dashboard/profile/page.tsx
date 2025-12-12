@@ -479,7 +479,7 @@ export default function ProfilePage() {
         <TabsContent value="settings" className="space-y-4">
           <Card className="shadow-none">
             <CardHeader>
-              <CardTitle>Notifications</CardTitle>
+                <CardTitle>Notifications</CardTitle>
               <CardDescription>
                 Manage how you receive daily reminders
               </CardDescription>
@@ -506,7 +506,7 @@ export default function ProfilePage() {
                       }
                     />
                   </div>
-                  <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor="email-daily-reminder" className="text-sm font-normal cursor-pointer">
                         Daily reminder
@@ -549,7 +549,7 @@ export default function ProfilePage() {
                       }
                     />
                   </div>
-                  <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor="sms-daily-reminder" className="text-sm font-normal cursor-pointer">
                         Daily reminder
@@ -580,8 +580,8 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent>
                 <Button variant="destructive" size="sm" disabled>
-                  Delete Account
-                </Button>
+                Delete Account
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

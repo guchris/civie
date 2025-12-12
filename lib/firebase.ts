@@ -58,6 +58,7 @@ export const googleProvider: GoogleAuthProvider = new GoogleAuthProvider();
 
 // Export Firestore utilities
 export { doc, getDoc, setDoc, Timestamp, onAuthStateChanged };
+export { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 
 // Helper function to get the base URL for action links
 // Uses environment variable if set, otherwise uses civie.org
