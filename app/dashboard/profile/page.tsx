@@ -9,41 +9,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, Shield, Flame, Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from "@/lib/firebase";
 import { format } from "date-fns";
-
-// User data type
-interface UserData {
-  fullName?: string;
-  birthDate?: string;
-  gender?: string;
-  zipCode?: string;
-  raceEthnicity?: string;
-  verified?: boolean;
-  verifiedAt?: string;
-  email?: string;
-  notifications?: {
-    email?: {
-      questionAlert?: boolean;
-      dailyReminder?: boolean;
-    };
-    sms?: {
-      questionAlert?: boolean;
-      dailyReminder?: boolean;
-    };
-  };
-}
-
-// Mock stats - replace with real data from your backend
-const userStats = {
-  streak: 7,
-  totalAnswered: 42,
-};
+import { useUserData, UserData } from "@/hooks/use-user-data";
+import { calculateUserStats } from "@/lib/question-utils";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { userData: hookUserData, loading: hookLoading } = useUserData();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -69,28 +45,21 @@ export default function ProfilePage() {
       if (user) {
         setIsAuthenticated(true);
         try {
-          // Fetch user data from Firestore
-          const userDocRef = doc(db, "users", user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-
-          if (userDocSnap.exists()) {
-            const data = userDocSnap.data();
-            setUserData({
-              ...data,
-              email: user.email || undefined,
-            } as UserData);
-            setZipCodeValue(data.zipCode || "");
+          // Use data from hook if available, otherwise fetch directly
+          if (hookUserData) {
+            setUserData(hookUserData as UserData);
+            setZipCodeValue(hookUserData.zipCode || "");
             
             // Load notification preferences (default to all enabled if not set)
-            if (data.notifications) {
+            if (hookUserData.notifications) {
               setNotifications({
                 email: {
-                  questionAlert: data.notifications.email?.questionAlert ?? true,
-                  dailyReminder: data.notifications.email?.dailyReminder ?? true,
+                  questionAlert: hookUserData.notifications.email?.questionAlert ?? true,
+                  dailyReminder: hookUserData.notifications.email?.dailyReminder ?? true,
                 },
                 sms: {
-                  questionAlert: data.notifications.sms?.questionAlert ?? true,
-                  dailyReminder: data.notifications.sms?.dailyReminder ?? true,
+                  questionAlert: hookUserData.notifications.sms?.questionAlert ?? true,
+                  dailyReminder: hookUserData.notifications.sms?.dailyReminder ?? true,
                 },
               });
             } else {
@@ -115,15 +84,42 @@ export default function ProfilePage() {
                 { merge: true }
               );
             }
+            setLoading(false);
           } else {
-            // User document doesn't exist yet (shouldn't happen if they completed verification)
+            // Fallback: fetch directly if hook data not available
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            setUserData({
+              ...data,
+              email: user.email || undefined,
+            } as UserData);
+            setZipCodeValue(data.zipCode || "");
+              
+              // Load notification preferences
+              if (data.notifications) {
+                setNotifications({
+                  email: {
+                    questionAlert: data.notifications.email?.questionAlert ?? true,
+                    dailyReminder: data.notifications.email?.dailyReminder ?? true,
+                  },
+                  sms: {
+                    questionAlert: data.notifications.sms?.questionAlert ?? true,
+                    dailyReminder: data.notifications.sms?.dailyReminder ?? true,
+                  },
+                });
+              }
+          } else {
             setUserData({
               email: user.email || undefined,
             });
+            }
+            setLoading(false);
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
-        } finally {
           setLoading(false);
         }
       } else {
@@ -133,7 +129,7 @@ export default function ProfilePage() {
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, hookUserData]);
 
   const handleUpdateZipCode = async () => {
     if (!isAuthenticated || !auth.currentUser) return;
@@ -268,15 +264,13 @@ export default function ProfilePage() {
     return raceMap[raceEthnicity] || raceEthnicity;
   };
 
-  if (loading) {
+  // Calculate stats from user answers
+  const userStats = calculateUserStats(hookUserData?.answers);
+
+  if (loading || hookLoading) {
     return (
-      <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading profile...</p>
-          </div>
-        </div>
+      <div className="container mx-auto max-w-7xl flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <Spinner />
       </div>
     );
   }

@@ -20,14 +20,14 @@ import {
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 
-function WelcomeBanner() {
-  const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
-
-  const dismissBanner = () => {
-    setShowWelcomeBanner(false);
-  };
-
-  if (!showWelcomeBanner) return null;
+function WelcomeBanner({ 
+  hasSeenWelcome, 
+  onDismiss 
+}: { 
+  hasSeenWelcome: boolean; 
+  onDismiss: () => void;
+}) {
+  if (hasSeenWelcome) return null;
 
   return (
     <div className="rounded-lg border border-green-600 dark:border-green-500 bg-green-50 dark:bg-green-950/20 p-4">
@@ -80,7 +80,7 @@ function WelcomeBanner() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={dismissBanner}
+          onClick={onDismiss}
           className="h-6 w-6 shrink-0 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
         >
           <X className="h-4 w-4" />
@@ -97,6 +97,7 @@ export default function DashboardHome() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "submitted" | "skipped" | "submitting">("idle");
   const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [hasSeenWelcome, setHasSeenWelcome] = useState<boolean>(true); // Default to true to prevent flash
   const todayDate = getTodayQuestionDate();
 
   // Update time remaining every minute
@@ -135,6 +136,13 @@ export default function DashboardHome() {
     fetchQuestion();
   }, [todayDate, userLoading]);
 
+  // Check if user has seen welcome banner
+  useEffect(() => {
+    if (userData) {
+      setHasSeenWelcome(userData.hasSeenWelcomeBanner === true);
+    }
+  }, [userData]);
+
   // Check user's answer state
   useEffect(() => {
     if (!userData || !userData.answers) {
@@ -153,6 +161,27 @@ export default function DashboardHome() {
       setStatus("idle");
     }
   }, [userData, todayDate]);
+
+  const handleDismissWelcomeBanner = async () => {
+    if (!user) return;
+    
+    setHasSeenWelcome(true);
+    
+    try {
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          hasSeenWelcomeBanner: true,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error("Error saving welcome banner dismissal:", error);
+      // Revert on error
+      setHasSeenWelcome(false);
+    }
+  };
 
   const handleAnswer = (answerId: string) => {
     if (selectedAnswer === answerId) {
@@ -281,7 +310,10 @@ export default function DashboardHome() {
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       {/* Welcome Banner */}
       <Suspense fallback={null}>
-        <WelcomeBanner />
+        <WelcomeBanner 
+          hasSeenWelcome={hasSeenWelcome} 
+          onDismiss={handleDismissWelcomeBanner}
+        />
       </Suspense>
 
       {/* Today's Question */}

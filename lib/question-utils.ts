@@ -92,3 +92,73 @@ export function formatQuestionDate(dateString: string): string {
   return `${months[date.getMonth()]} ${date.getDate()}`;
 }
 
+/**
+ * Get previous day's date in YYYY-MM-DD format
+ */
+export function getPreviousDate(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00');
+  date.setDate(date.getDate() - 1);
+  return formatDateForQuestion(date);
+}
+
+/**
+ * User answer interface
+ */
+export interface UserAnswer {
+  status: "answered" | "skipped";
+  answerOptionId?: string;
+  timestamp: string;
+}
+
+/**
+ * Calculate user stats from their answers
+ * Returns streak (consecutive days answered) and total answered count
+ */
+export function calculateUserStats(answers: Record<string, UserAnswer> | undefined): {
+  streak: number;
+  totalAnswered: number;
+} {
+  if (!answers || Object.keys(answers).length === 0) {
+    return { streak: 0, totalAnswered: 0 };
+  }
+
+  // Calculate total answered
+  const totalAnswered = Object.values(answers).filter(
+    (answer) => answer.status === "answered"
+  ).length;
+
+  // Calculate streak
+  let streak = 0;
+  let currentDate = getTodayQuestionDate();
+  
+  // Check if today is answered - if not, start from yesterday
+  const todayAnswer = answers[currentDate];
+  if (todayAnswer?.status === "answered") {
+    streak = 1;
+  } else {
+    // Start from yesterday if today not answered
+    currentDate = getPreviousDate(currentDate);
+    // Check if yesterday is answered, if not streak is 0
+    const yesterdayAnswer = answers[currentDate];
+    if (yesterdayAnswer?.status !== "answered") {
+      return { streak: 0, totalAnswered };
+    }
+    streak = 1;
+  }
+
+  // Go backwards day by day, counting consecutive answered days
+  while (true) {
+    currentDate = getPreviousDate(currentDate);
+    const answer = answers[currentDate];
+    
+    if (answer?.status === "answered") {
+      streak++;
+    } else {
+      // Stop at first skipped or missing day
+      break;
+    }
+  }
+
+  return { streak, totalAnswered };
+}
+

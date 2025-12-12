@@ -21,6 +21,17 @@ export interface UserData {
   verifiedAt?: string;
   email?: string;
   answers?: Record<string, UserAnswer>; // date -> answer mapping
+  hasSeenWelcomeBanner?: boolean;
+  notifications?: {
+    email?: {
+      questionAlert?: boolean;
+      dailyReminder?: boolean;
+    };
+    sms?: {
+      questionAlert?: boolean;
+      dailyReminder?: boolean;
+    };
+  };
 }
 
 export function useUserData() {

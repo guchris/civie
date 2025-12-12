@@ -13,9 +13,9 @@ import Link from "next/link";
 // Mock data - replace with real data from your backend
 const pastQuestions = [
   {
-    id: "q-2025-12-14",
-    date: "December 14, 2025",
-    dateObj: new Date(2025, 11, 14),
+    id: "q-2025-12-11",
+    date: "December 11, 2025",
+    dateObj: new Date(2025, 11, 11),
     question: "Do you support increasing the minimum wage in your state?",
     answered: true,
     resultsUnlocked: true,
@@ -26,9 +26,9 @@ const pastQuestions = [
     },
   },
   {
-    id: "q-2025-12-13",
-    date: "December 13, 2025",
-    dateObj: new Date(2025, 11, 13),
+    id: "q-2025-12-10",
+    date: "December 10, 2025",
+    dateObj: new Date(2025, 11, 10),
     question: "Should your city invest more in renewable energy infrastructure?",
     answered: true,
     resultsUnlocked: true,
@@ -39,9 +39,9 @@ const pastQuestions = [
     },
   },
   {
-    id: "q-2025-12-12",
-    date: "December 12, 2025",
-    dateObj: new Date(2025, 11, 12),
+    id: "q-2025-12-9",
+    date: "December 9, 2025",
+    dateObj: new Date(2025, 11, 9),
     question: "Do you believe your state should expand access to early childhood education?",
     answered: false,
     resultsUnlocked: true,
@@ -52,9 +52,9 @@ const pastQuestions = [
     },
   },
   {
-    id: "q-2025-12-11",
-    date: "December 11, 2025",
-    dateObj: new Date(2025, 11, 11),
+    id: "q-2025-12-8",
+    date: "December 8, 2025",
+    dateObj: new Date(2025, 11, 8),
     question: "Should your state implement stricter emissions standards for vehicles?",
     answered: true,
     resultsUnlocked: true,
