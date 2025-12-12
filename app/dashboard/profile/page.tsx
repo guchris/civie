@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Shield, Flame, Award, Settings, Bell, Trash2, Loader2, LogOut } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { CheckCircle2, Shield, Flame, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
 import { format } from "date-fns";
 
 // User data type
@@ -23,16 +24,22 @@ interface UserData {
   verified?: boolean;
   verifiedAt?: string;
   email?: string;
+  notifications?: {
+    email?: {
+      questionAlert?: boolean;
+      dailyReminder?: boolean;
+    };
+    sms?: {
+      questionAlert?: boolean;
+      dailyReminder?: boolean;
+    };
+  };
 }
 
 // Mock stats - replace with real data from your backend
 const userStats = {
   streak: 7,
   totalAnswered: 42,
-  badges: [
-    { name: "7-day streak", icon: Flame },
-    { name: "First week", icon: Award },
-  ],
 };
 
 export default function ProfilePage() {
@@ -43,6 +50,18 @@ export default function ProfilePage() {
   const [editingZipCode, setEditingZipCode] = useState(false);
   const [zipCodeValue, setZipCodeValue] = useState("");
   const [savingZipCode, setSavingZipCode] = useState(false);
+  
+  // Notification preferences state (default to all enabled)
+  const [notifications, setNotifications] = useState({
+    email: {
+      questionAlert: true,
+      dailyReminder: true,
+    },
+    sms: {
+      questionAlert: true,
+      dailyReminder: true,
+    },
+  });
 
   // Fetch user data from Firestore
   useEffect(() => {
@@ -61,6 +80,41 @@ export default function ProfilePage() {
               email: user.email || undefined,
             } as UserData);
             setZipCodeValue(data.zipCode || "");
+            
+            // Load notification preferences (default to all enabled if not set)
+            if (data.notifications) {
+              setNotifications({
+                email: {
+                  questionAlert: data.notifications.email?.questionAlert ?? true,
+                  dailyReminder: data.notifications.email?.dailyReminder ?? true,
+                },
+                sms: {
+                  questionAlert: data.notifications.sms?.questionAlert ?? true,
+                  dailyReminder: data.notifications.sms?.dailyReminder ?? true,
+                },
+              });
+            } else {
+              // If no preferences exist, they default to all enabled (already set in state)
+              // But we should save them to Firestore for consistency
+              const defaultNotifications = {
+                email: {
+                  questionAlert: true,
+                  dailyReminder: true,
+                },
+                sms: {
+                  questionAlert: true,
+                  dailyReminder: true,
+                },
+              };
+              await setDoc(
+                doc(db, "users", user.uid),
+                {
+                  notifications: defaultNotifications,
+                  updatedAt: new Date().toISOString(),
+                },
+                { merge: true }
+              );
+            }
           } else {
             // User document doesn't exist yet (shouldn't happen if they completed verification)
             setUserData({
@@ -111,15 +165,48 @@ export default function ProfilePage() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleNotificationChange = async (
+    type: "email" | "sms",
+    preference: "questionAlert" | "dailyReminder",
+    value: boolean
+  ) => {
+    if (!isAuthenticated || !auth.currentUser) return;
+
+    const updatedNotifications = {
+      ...notifications,
+      [type]: {
+        ...notifications[type],
+        [preference]: value,
+      },
+    };
+
+    setNotifications(updatedNotifications);
+
     try {
-      await signOut(auth);
-      router.push("/");
+      const user = auth.currentUser;
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          notifications: updatedNotifications,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
+      // Update local state
+      setUserData((prev) => ({
+        ...prev,
+        notifications: updatedNotifications,
+      }));
     } catch (error) {
-      console.error("Error signing out:", error);
-      alert("Failed to sign out. Please try again.");
+      console.error("Error updating notification preferences:", error);
+      // Revert on error
+      setNotifications(notifications);
+      alert("Failed to update notification preferences. Please try again.");
     }
   };
+
+
 
   // Format date for display
   const formatDate = (dateString?: string) => {
@@ -196,10 +283,7 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your identity, view your stats, and adjust settings
-        </p>
+        <h1 className="text-xl font-bold tracking-tight">Profile</h1>
       </div>
 
       <Tabs defaultValue="stats" className="space-y-6">
@@ -210,7 +294,7 @@ export default function ProfilePage() {
         </TabsList>
 
         <TabsContent value="stats" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Card className="shadow-none">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
@@ -231,40 +315,7 @@ export default function ProfilePage() {
                 <p className="text-xs text-muted-foreground">Questions answered</p>
               </CardContent>
             </Card>
-            <Card className="shadow-none">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Badges Earned</CardTitle>
-                <Award className="h-4 w-4 text-yellow-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userStats.badges.length}</div>
-                <p className="text-xs text-muted-foreground">Achievements unlocked</p>
-              </CardContent>
-            </Card>
           </div>
-
-          <Card className="shadow-none">
-            <CardHeader>
-              <CardTitle>Your Badges</CardTitle>
-              <CardDescription>Participation achievements you've earned</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-4">
-                {userStats.badges.map((badge) => {
-                  const Icon = badge.icon;
-                  return (
-                    <div
-                      key={badge.name}
-                      className="flex items-center gap-2 rounded-lg border p-3"
-                    >
-                      <Icon className="h-5 w-5 text-primary" />
-                      <span className="font-medium">{badge.name}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="identity" className="space-y-4">
@@ -307,7 +358,7 @@ export default function ProfilePage() {
                       type="text"
                       value={userData.fullName}
                       readOnly
-                      className="mt-1 bg-muted"
+                      className="mt-1 bg-muted shadow-none"
                     />
                   </div>
                 )}
@@ -320,7 +371,7 @@ export default function ProfilePage() {
                       type="email"
                       value={userData.email}
                       readOnly
-                      className="mt-1 bg-muted"
+                      className="mt-1 bg-muted shadow-none"
                     />
                   </div>
                 )}
@@ -332,7 +383,7 @@ export default function ProfilePage() {
                     type="text"
                     value={formatBirthDate(userData?.birthDate)}
                     readOnly
-                    className="mt-1 bg-muted"
+                    className="mt-1 bg-muted shadow-none"
                   />
                 </div>
                 <div>
@@ -343,7 +394,7 @@ export default function ProfilePage() {
                     type="text"
                     value={formatGender(userData?.gender)}
                     readOnly
-                    className="mt-1 bg-muted"
+                    className="mt-1 bg-muted shadow-none"
                   />
                 </div>
                 <div>
@@ -354,7 +405,7 @@ export default function ProfilePage() {
                     type="text"
                     value={formatRaceEthnicity(userData?.raceEthnicity)}
                     readOnly
-                    className="mt-1 bg-muted"
+                    className="mt-1 bg-muted shadow-none"
                   />
                 </div>
                 <div>
@@ -404,11 +455,11 @@ export default function ProfilePage() {
                           type="text"
                           value={userData?.zipCode || "Not set"}
                           readOnly
-                          className="bg-muted flex-1"
+                          className="bg-muted flex-1 shadow-none"
                         />
                         <Button
-                          size="sm"
                           variant="outline"
+                          className="shadow-none"
                           onClick={() => {
                             setEditingZipCode(true);
                             setZipCodeValue(userData?.zipCode || "");
@@ -428,97 +479,109 @@ export default function ProfilePage() {
         <TabsContent value="settings" className="space-y-4">
           <Card className="shadow-none">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                <CardTitle>Notifications</CardTitle>
-              </div>
+              <CardTitle>Notifications</CardTitle>
               <CardDescription>
                 Manage how you receive daily reminders
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Email Notifications</p>
-                  <p className="text-sm text-muted-foreground">
-                    Receive daily question reminders via email
-                  </p>
+            <CardContent className="space-y-6">
+              {/* Email Notifications */}
+              <div className="space-y-4">
+                <h3 className="font-medium">Email Notifications</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="email-question-alert" className="text-sm font-normal cursor-pointer">
+                        New question alert
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Get notified when today&apos;s question becomes available
+                      </p>
+                    </div>
+                    <Switch
+                      id="email-question-alert"
+                      checked={notifications.email.questionAlert}
+                      onCheckedChange={(checked) =>
+                        handleNotificationChange("email", "questionAlert", checked)
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="email-daily-reminder" className="text-sm font-normal cursor-pointer">
+                        Daily reminder
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Reminder to answer if you haven&apos;t yet
+                      </p>
+                    </div>
+                    <Switch
+                      id="email-daily-reminder"
+                      checked={notifications.email.dailyReminder}
+                      onCheckedChange={(checked) =>
+                        handleNotificationChange("email", "dailyReminder", checked)
+                      }
+                    />
+                  </div>
                 </div>
-                <Button variant="outline" size="sm">
-                  Configure
-                </Button>
               </div>
+
               <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Browser Push Notifications</p>
-                  <p className="text-sm text-muted-foreground">
-                    Get notified at 9 AM local time
-                  </p>
+
+              {/* SMS Notifications */}
+              <div className="space-y-4">
+                <h3 className="font-medium">SMS Notifications</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="sms-question-alert" className="text-sm font-normal cursor-pointer">
+                        New question alert
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Get notified when today&apos;s question becomes available
+                      </p>
+                    </div>
+                    <Switch
+                      id="sms-question-alert"
+                      checked={notifications.sms.questionAlert}
+                      onCheckedChange={(checked) =>
+                        handleNotificationChange("sms", "questionAlert", checked)
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="sms-daily-reminder" className="text-sm font-normal cursor-pointer">
+                        Daily reminder
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Reminder to answer if you haven&apos;t yet
+                      </p>
+                    </div>
+                    <Switch
+                      id="sms-daily-reminder"
+                      checked={notifications.sms.dailyReminder}
+                      onCheckedChange={(checked) =>
+                        handleNotificationChange("sms", "dailyReminder", checked)
+                      }
+                    />
+                  </div>
                 </div>
-                <Button variant="outline" size="sm">
-                  Enable
-                </Button>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-none">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                <CardTitle>Privacy</CardTitle>
-              </div>
-              <CardDescription>
-                Learn how we protect your anonymity
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Civie logs that you answered, not what you chose. Your responses are only
-                stored as aggregate counters. No response-level PII is ever stored.
-              </p>
-              <Button variant="outline" size="sm">
-                Learn More
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-none">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <LogOut className="h-5 w-5" />
-                <CardTitle>Sign Out</CardTitle>
-              </div>
-              <CardDescription>
-                Sign out of your account
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                You can sign back in at any time using your email.
-              </p>
-              <Button variant="outline" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
             </CardContent>
           </Card>
 
           <Card className="border-destructive shadow-none">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Trash2 className="h-5 w-5 text-destructive" />
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
-              </div>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              <CardDescription>
+                Permanently delete your account. This action cannot be undone.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Permanently delete your account and all associated data. This action cannot be undone.
-              </p>
-              <Button variant="destructive" size="sm">
-                Delete Account
-              </Button>
+                <Button variant="destructive" size="sm" disabled>
+                  Delete Account
+                </Button>
             </CardContent>
           </Card>
         </TabsContent>

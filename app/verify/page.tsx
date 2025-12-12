@@ -82,6 +82,16 @@ export default function VerifyPage() {
         verifiedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        notifications: {
+          email: {
+            questionAlert: true,
+            dailyReminder: true,
+          },
+          sms: {
+            questionAlert: true,
+            dailyReminder: true,
+          },
+        },
       };
 
       await setDoc(doc(db, "users", user.uid), userData, { merge: true });

@@ -8,10 +8,7 @@ export default function DataPage() {
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Open Data</h1>
-        <p className="text-muted-foreground mt-2">
-          Transparent, accessible civic datasets for everyone
-        </p>
+        <h1 className="text-xl font-bold tracking-tight">Open Data</h1>
       </div>
 
       {/* Transparency Principles */}

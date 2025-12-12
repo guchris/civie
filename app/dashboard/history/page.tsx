@@ -173,10 +173,7 @@ export default function HistoryPage() {
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">History</h1>
-        <p className="text-muted-foreground mt-2">
-          Browse all past questions and view results you've unlocked
-        </p>
+        <h1 className="text-xl font-bold tracking-tight">History</h1>
       </div>
 
       {/* Search Bar */}

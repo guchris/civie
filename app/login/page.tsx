@@ -19,7 +19,7 @@ export default function LoginPage() {
           
           if (userDocSnap.exists() && userDocSnap.data().verified) {
             // User is already verified, redirect to dashboard
-            router.push("/dashboard");
+        router.push("/dashboard");
           } else {
             // User is not verified yet, redirect to verification page
             router.push("/verify");
