@@ -18,7 +18,7 @@ export function PrivacyCard() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Card className="h-full flex items-center justify-center p-6 shadow-none transition-all hover:bg-accent dark:bg-black cursor-pointer sm:p-8 md:p-10 lg:p-4 min-h-[80px] sm:min-h-[100px] lg:min-h-0 group">
+        <Card className="h-full flex items-center justify-center p-6 shadow-none transition-all hover:bg-accent dark:bg-black dark:hover:bg-accent cursor-pointer sm:p-8 md:p-10 lg:p-4 min-h-[80px] sm:min-h-[100px] lg:min-h-0 group">
           <CardContent className="p-0">
             <Shield className="h-6 w-6 sm:h-8 sm:w-8 lg:h-6 lg:w-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 fill-current" />
           </CardContent>

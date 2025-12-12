@@ -30,7 +30,7 @@ export function ThemeToggleCard() {
   return (
     <Card
       onClick={toggleTheme}
-      className="h-full flex items-center justify-center p-6 shadow-none transition-all hover:bg-accent dark:bg-black cursor-pointer sm:p-8 md:p-10 lg:p-4 min-h-[80px] sm:min-h-[100px] lg:min-h-0 group"
+      className="h-full flex items-center justify-center p-6 shadow-none transition-all hover:bg-accent dark:bg-black dark:hover:bg-accent cursor-pointer sm:p-8 md:p-10 lg:p-4 min-h-[80px] sm:min-h-[100px] lg:min-h-0 group"
     >
       <CardContent className="p-0">
         {theme === "dark" ? (
