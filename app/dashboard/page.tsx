@@ -196,11 +196,6 @@ export default function DashboardHome() {
       );
 
       // Save to answers collection for aggregation (anonymous)
-      // First ensure the parent document exists
-      const answerDateRef = doc(db, "answers", todayDate);
-      await setDoc(answerDateRef, { date: todayDate, createdAt: timestamp }, { merge: true });
-
-      // Then add the response to the subcollection
       const responseData = {
         answerOptionId: selectedAnswer,
         age,
@@ -217,15 +212,9 @@ export default function DashboardHome() {
 
       setStatus("submitted");
       toast.success("Response submitted successfully!");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error submitting answer:", error);
-      const errorMessage = error?.message || error?.code || "Unknown error";
-      console.error("Error details:", {
-        code: error?.code,
-        message: error?.message,
-        stack: error?.stack,
-      });
-      toast.error(`Failed to submit answer: ${errorMessage}. Please try again.`);
+      toast.error("Failed to submit answer. Please try again.");
       setStatus("idle");
     }
   };
@@ -254,7 +243,7 @@ export default function DashboardHome() {
         { merge: true }
       );
 
-      setStatus("skipped");
+    setStatus("skipped");
       toast.success("Question skipped.");
     } catch (error) {
       console.error("Error skipping question:", error);
@@ -318,27 +307,27 @@ export default function DashboardHome() {
                 {question.answerOptions
                   .sort((a, b) => a.order - b.order)
                   .map((option) => (
-                    <button
+                <button
                       key={option.id}
                       onClick={() => handleAnswer(option.id)}
                       disabled={status === "submitting"}
                       className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm disabled:opacity-50 ${
                         selectedAnswer === option.id
-                          ? "border-accent text-accent-foreground scale-[1.02]"
-                          : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                      }`}
-                    >
+                      ? "border-accent text-accent-foreground scale-[1.02]"
+                      : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
                       {selectedAnswer === option.id && (
-                        <>
-                          <div className="absolute inset-0 bg-accent origin-left animate-[fill_0.3s_ease-out_forwards]" />
-                          <div className="relative flex items-center gap-2">
-                            <Check className="h-4 w-4 animate-[fadeIn_0.3s_ease-out]" />
+                    <>
+                      <div className="absolute inset-0 bg-accent origin-left animate-[fill_0.3s_ease-out_forwards]" />
+                      <div className="relative flex items-center gap-2">
+                        <Check className="h-4 w-4 animate-[fadeIn_0.3s_ease-out]" />
                             <span>{option.label}</span>
-                          </div>
-                        </>
-                      )}
+                      </div>
+                    </>
+                  )}
                       {selectedAnswer !== option.id && <span>{option.label}</span>}
-                    </button>
+                </button>
                   ))}
                 <div className="flex gap-2 items-center">
                   <button
@@ -443,7 +432,7 @@ export default function DashboardHome() {
         </Card>
       )}
 
-      {/* Arguments Card */}
+        {/* Arguments Card */}
       {question.arguments && (question.arguments.pro || question.arguments.con) && (
         <Card className="shadow-none">
           <CardHeader>
