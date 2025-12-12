@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, ArrowUpRight, CheckCircle2, XCircle, Check } from "lucide-react";
 import { ThemeToggleCard } from "@/components/theme-toggle-card";
 import { PrivacyCard } from "@/components/privacy-card";
-import { ParticipantCountCard } from "@/components/participant-count-card";
 import { AnimatedLogo } from "@/components/animated-logo";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
@@ -84,11 +82,11 @@ export function LandingHero() {
         </Card>
 
         {/* Login Card - Replaces Privacy/Theme position */}
-        <Link href="/login" className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1">
+        <Link href="/login" className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 group">
           <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent dark:bg-black dark:hover:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
             <CardContent className="p-0">
               <span className="text-xl font-bold sm:text-2xl lg:text-3xl">Login</span>
-              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7" />
+              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
             </CardContent>
           </Card>
         </Link>
@@ -111,58 +109,6 @@ export function LandingHero() {
           <CardContent className="space-y-4">
             {status === "idle" ? (
               <>
-                {/* Accordion for additional information */}
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="summary" className="border-none">
-                    <AccordionTrigger className="text-xs font-semibold py-2 sm:text-sm">
-                      Summary
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-2">
-                      <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
-                        {exampleQuestion.summary}
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="vote-meaning" className="border-none">
-                    <AccordionTrigger className="text-xs font-semibold py-2 sm:text-sm">
-                      What Your Vote Means
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-2">
-                      <div>
-                        <p className="text-xs font-medium mb-1 sm:text-sm">YES</p>
-                        <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
-                          {exampleQuestion.yesMeaning}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium mb-1 sm:text-sm">NO</p>
-                        <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
-                          {exampleQuestion.noMeaning}
-                        </p>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="arguments" className="border-none">
-                    <AccordionTrigger className="text-xs font-semibold py-2 sm:text-sm">
-                      Arguments
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-2">
-                      <div>
-                        <p className="text-xs font-medium mb-1 sm:text-sm">PRO</p>
-                        <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
-                          {exampleQuestion.proArgument}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium mb-1 sm:text-sm">CON</p>
-                        <p className="text-xs leading-relaxed sm:text-sm text-muted-foreground">
-                          {exampleQuestion.conArgument}
-                        </p>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-
                 {/* Answer Buttons */}
                 <div className="flex flex-col gap-2 py-2">
                   <button
@@ -274,9 +220,15 @@ export function LandingHero() {
           </div>
         </div>
 
-        {/* Participant Count Card - Moved to new location */}
-        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-4">
-          <ParticipantCountCard />
+        {/* Available in US Card */}
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-4 group">
+          <Card className="h-full flex flex-col justify-center p-6 shadow-none dark:bg-black sm:p-8 md:p-10 lg:p-4 min-h-[80px] sm:min-h-[100px] lg:min-h-0">
+            <CardContent className="p-0 flex flex-col items-start justify-center">
+              <p className="text-lg font-semibold sm:text-xl lg:text-2xl">
+                Available in the <span className="group-hover:italic">United States.</span>
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
 
@@ -291,12 +243,12 @@ export function LandingHero() {
           </CardContent>
         </Card>
 
-        {/* Open-Source Data - Clickable Card - Full width on mobile, same row as Description on desktop */}
-        <Link href="/dashboard/data" className="block h-full col-span-2 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-5">
+        {/* Open-Source Data - Clickable Card - Full width on mobile and tablet, same row as Description on desktop */}
+        <Link href="/dashboard/data" className="block h-full col-span-2 sm:col-span-2 lg:col-span-2 lg:row-span-1 lg:row-start-5 group">
           <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent dark:bg-black dark:hover:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
             <CardContent className="p-0">
               <span className="text-xl font-semibold sm:text-2xl lg:text-3xl">Open-Source Data</span>
-              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7" />
+              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
             </CardContent>
           </Card>
         </Link>
