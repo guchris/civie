@@ -40,17 +40,49 @@ export function LoginForm({
       return;
     }
 
-    // Create reCAPTCHA verifier - for invisible, no need to call render()
-    recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-      size: "invisible",
-      callback: () => {
-        // reCAPTCHA solved - allow signInWithPhoneNumber
-      },
-      "expired-callback": () => {
-        // Response expired. Ask user to solve reCAPTCHA again.
-        setError("reCAPTCHA expired. Please try again.");
-      },
-    });
+    // Don't re-initialize if already exists
+    if (recaptchaVerifierRef.current) {
+      return;
+    }
+
+    try {
+      // Clear any existing reCAPTCHA in the container first
+      const container = recaptchaContainerRef.current;
+      if (container && container.children.length > 0) {
+        container.innerHTML = "";
+      }
+
+      // Create reCAPTCHA verifier - for invisible, no need to call render()
+      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, container, {
+        size: "invisible",
+        callback: () => {
+          // reCAPTCHA solved - allow signInWithPhoneNumber
+        },
+        "expired-callback": () => {
+          // Response expired. Ask user to solve reCAPTCHA again.
+          setError("reCAPTCHA expired. Please try again.");
+        },
+      });
+    } catch (error: any) {
+      console.error("Error initializing reCAPTCHA:", error);
+      if (error.message?.includes("already been rendered")) {
+        // Container was already used, clear it and try again
+        if (recaptchaContainerRef.current) {
+          recaptchaContainerRef.current.innerHTML = "";
+          try {
+            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+              size: "invisible",
+              callback: () => {},
+              "expired-callback": () => {
+                setError("reCAPTCHA expired. Please try again.");
+              },
+            });
+          } catch (retryError) {
+            console.error("Error retrying reCAPTCHA initialization:", retryError);
+          }
+        }
+      }
+    }
 
     return () => {
       if (recaptchaVerifierRef.current) {
@@ -60,6 +92,10 @@ export function LoginForm({
           console.error("Error clearing reCAPTCHA:", error);
         }
         recaptchaVerifierRef.current = null;
+      }
+      // Also clear the container HTML
+      if (recaptchaContainerRef.current) {
+        recaptchaContainerRef.current.innerHTML = "";
       }
     };
   }, []);
@@ -97,7 +133,11 @@ export function LoginForm({
       if (error.code === "auth/invalid-app-credential") {
         setError("App verification failed. Please check your Firebase configuration.");
       } else if (error.code === "auth/captcha-check-failed") {
-        setError("Security verification failed. Please try again.");
+        const hostname = typeof window !== "undefined" ? window.location.hostname : "unknown";
+        setError(
+          `Security verification failed. Please ensure "${hostname}" is added to Firebase Authorized Domains. ` +
+          "Go to Firebase Console > Authentication > Settings > Authorized domains."
+        );
       } else if (error.code === "auth/invalid-phone-number") {
         setError("Invalid phone number format. Please enter a valid phone number with country code.");
       } else if (error.code === "auth/too-many-requests") {
@@ -107,20 +147,36 @@ export function LoginForm({
       }
       
       // Clear and re-initialize reCAPTCHA on error
-      if (recaptchaVerifierRef.current && recaptchaContainerRef.current) {
+      if (recaptchaContainerRef.current) {
         try {
-          recaptchaVerifierRef.current.clear();
-          recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-            size: "invisible",
-            callback: () => {
-              // reCAPTCHA solved
-            },
-            "expired-callback": () => {
-              setError("reCAPTCHA expired. Please try again.");
-            },
-          });
+          if (recaptchaVerifierRef.current) {
+            recaptchaVerifierRef.current.clear();
+          }
+          recaptchaVerifierRef.current = null;
+          
+          // Clear the container HTML completely
+          recaptchaContainerRef.current.innerHTML = "";
+          
+          // Wait a bit before re-initializing to ensure cleanup is complete
+          setTimeout(() => {
+            if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
+              try {
+                recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                  size: "invisible",
+                  callback: () => {
+                    // reCAPTCHA solved
+                  },
+                  "expired-callback": () => {
+                    setError("reCAPTCHA expired. Please try again.");
+                  },
+                });
+              } catch (retryErr) {
+                console.error("Error re-initializing reCAPTCHA:", retryErr);
+              }
+            }
+          }, 100);
         } catch (err) {
-          console.error("Error re-initializing reCAPTCHA:", err);
+          console.error("Error clearing reCAPTCHA:", err);
         }
       }
     } finally {
