@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { format, parseISO, isValid } from "date-fns";
 import { auth, onAuthStateChanged } from "@/lib/firebase";
 import { getAdminStatus } from "@/lib/admin";
-import { AdminQuestionForm } from "@/components/admin-question-form";
+import { AdminQuestionForm, AdminQuestionFormRef } from "@/components/admin-question-form";
 import { DashboardNav } from "@/components/dashboard-nav";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { db, doc, getDoc } from "@/lib/firebase";
 import { QuestionData } from "@/lib/question-presets";
@@ -23,6 +23,8 @@ export default function AdminQuestionDetailPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [questionData, setQuestionData] = useState<QuestionData | undefined>();
   const [loadingQuestion, setLoadingQuestion] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const formRef = useRef<AdminQuestionFormRef>(null);
 
   // Validate date format
   const isValidDate = date && /^\d{4}-\d{2}-\d{2}$/.test(date) && isValid(parseISO(date));
@@ -133,20 +135,34 @@ export default function AdminQuestionDetailPage() {
     <>
       <DashboardNav />
       <div className="container mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.push("/admin")}
+            className="shadow-none"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="shadow-none hover:bg-transparent hover:text-foreground cursor-default"
+          >
+            {formattedDate}
+          </Button>
+        </div>
         <Button
-          variant="outline"
+          onClick={() => formRef.current?.handleSave()}
+          disabled={saving}
           size="icon"
-          onClick={() => router.push("/admin")}
           className="shadow-none"
         >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          className="shadow-none hover:bg-transparent hover:text-foreground cursor-default"
-        >
-          {formattedDate}
+          {saving ? (
+            <Spinner className="h-4 w-4" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
         </Button>
       </div>
 
@@ -163,9 +179,11 @@ export default function AdminQuestionDetailPage() {
         </CardHeader>
         <CardContent>
           <AdminQuestionForm
+            ref={formRef}
             date={date}
             initialData={questionData}
             onSave={handleSave}
+            onSavingChange={setSaving}
           />
         </CardContent>
       </Card>

@@ -9,6 +9,7 @@ import {
   getPaginationRowModel,
   flexRender,
   type ColumnDef,
+  type VisibilityState,
 } from "@tanstack/react-table";
 import { db, collection, getDocs, query, where } from "@/lib/firebase";
 import { QuestionData, generateAnswerOptions } from "@/lib/question-presets";
@@ -22,7 +23,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 
@@ -46,6 +53,7 @@ export function AdminQuestionsTable() {
   const [dates] = useState<string[]>(generateDateRange());
   const [questions, setQuestions] = useState<Record<string, QuestionData>>({});
   const [loading, setLoading] = useState(true);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // Fetch existing questions
   useEffect(() => {
@@ -124,6 +132,7 @@ export function AdminQuestionsTable() {
             </span>
           );
         },
+        enableHiding: false,
       },
       {
         accessorKey: "question",
@@ -164,7 +173,7 @@ export function AdminQuestionsTable() {
           const hasQuestion = !!questions[row.original.date];
           return (
             <Badge variant={hasQuestion ? "default" : "secondary"}>
-              {hasQuestion ? "Has Question" : "Empty"}
+              {hasQuestion ? "Set" : "Empty"}
             </Badge>
           );
         },
@@ -178,6 +187,10 @@ export function AdminQuestionsTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    state: {
+      columnVisibility,
+    },
     initialState: {
       pagination: {
         pageSize: 10,
@@ -195,8 +208,45 @@ export function AdminQuestionsTable() {
   }
 
   return (
-    <div className="overflow-hidden rounded-md border">
-      <Table>
+    <div className="space-y-4">
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="shadow-none">
+              Columns <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id === "answerType"
+                      ? "Type"
+                      : column.id === "options"
+                      ? "Options"
+                      : column.id === "status"
+                      ? "Status"
+                      : column.id === "question"
+                      ? "Question"
+                      : column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="overflow-hidden rounded-md border">
+        <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -236,40 +286,28 @@ export function AdminQuestionsTable() {
         </TableBody>
       </Table>
       {/* Pagination */}
-      <div className="flex items-center justify-between px-4 py-4 border-t">
-        <div className="text-sm text-muted-foreground">
-          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
-          {Math.min(
-            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-            table.getFilteredRowModel().rows.length
-          )}{" "}
-          of {table.getFilteredRowModel().rows.length} questions
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
-          </Button>
-          <div className="flex items-center gap-1">
-            <span className="text-sm text-muted-foreground">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-            </span>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
+      <div className="flex items-center justify-end gap-2 px-4 py-4 border-t">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className="shadow-none"
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className="shadow-none"
+        >
+          Next
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
       </div>
     </div>
   );

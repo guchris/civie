@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { auth, db, doc, getDoc, setDoc } from "@/lib/firebase";
 import {
   QuestionData,
@@ -27,9 +27,16 @@ interface AdminQuestionFormProps {
   date: string;
   initialData?: QuestionData;
   onSave?: () => void;
+  onSavingChange?: (saving: boolean) => void;
 }
 
-export function AdminQuestionForm({ date, initialData, onSave }: AdminQuestionFormProps) {
+export interface AdminQuestionFormRef {
+  handleSave: () => Promise<void>;
+  saving: boolean;
+}
+
+export const AdminQuestionForm = forwardRef<AdminQuestionFormRef, AdminQuestionFormProps>(
+  ({ date, initialData, onSave, onSavingChange }, ref) => {
   const [question, setQuestion] = useState<QuestionData>(
     initialData || {
       date,
@@ -41,6 +48,10 @@ export function AdminQuestionForm({ date, initialData, onSave }: AdminQuestionFo
   );
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(!initialData);
+
+  useEffect(() => {
+    onSavingChange?.(saving);
+  }, [saving, onSavingChange]);
 
   // Load question if not provided
   useEffect(() => {
@@ -147,6 +158,11 @@ export function AdminQuestionForm({ date, initialData, onSave }: AdminQuestionFo
     }
   };
 
+  useImperativeHandle(ref, () => ({
+    handleSave,
+    saving,
+  }));
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -248,22 +264,9 @@ export function AdminQuestionForm({ date, initialData, onSave }: AdminQuestionFo
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving} className="shadow-none">
-          {saving ? (
-            <>
-              <Spinner className="h-4 w-4 mr-2" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 mr-2" />
-              Save
-            </>
-          )}
-        </Button>
-      </div>
     </div>
   );
-}
+});
+
+AdminQuestionForm.displayName = "AdminQuestionForm";
 
