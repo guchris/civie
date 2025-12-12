@@ -132,10 +132,18 @@ export default function ProfilePage() {
     }
   };
 
-  // Format birth date for display
+  // Format birth date for display - handle timezone issues
   const formatBirthDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     try {
+      // Parse YYYY-MM-DD format directly to avoid timezone issues
+      // Split the date string and create a date in local timezone
+      const [year, month, day] = dateString.split("-").map(Number);
+      if (year && month && day) {
+        const date = new Date(year, month - 1, day); // month is 0-indexed
+        return format(date, "MMMM d, yyyy");
+      }
+      // Fallback to regular date parsing
       const date = new Date(dateString);
       return format(date, "MMMM d, yyyy");
     } catch {
@@ -295,7 +303,12 @@ export default function ProfilePage() {
                     <label className="text-sm font-medium text-muted-foreground">
                       Full Name
                     </label>
-                    <p className="mt-1">{userData.fullName}</p>
+                    <Input
+                      type="text"
+                      value={userData.fullName}
+                      readOnly
+                      className="mt-1 bg-muted"
+                    />
                   </div>
                 )}
                 {userData?.email && (
@@ -303,39 +316,50 @@ export default function ProfilePage() {
                     <label className="text-sm font-medium text-muted-foreground">
                       Email
                     </label>
-                    <p className="mt-1">{userData.email}</p>
+                    <Input
+                      type="email"
+                      value={userData.email}
+                      readOnly
+                      className="mt-1 bg-muted"
+                    />
                   </div>
                 )}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">
                     Birth Date
                   </label>
-                  <p className="mt-1">{formatBirthDate(userData?.birthDate)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This field cannot be changed after verification
-                  </p>
+                  <Input
+                    type="text"
+                    value={formatBirthDate(userData?.birthDate)}
+                    readOnly
+                    className="mt-1 bg-muted"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">
                     Gender
                   </label>
-                  <p className="mt-1">{formatGender(userData?.gender)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This field cannot be changed after verification
-                  </p>
+                  <Input
+                    type="text"
+                    value={formatGender(userData?.gender)}
+                    readOnly
+                    className="mt-1 bg-muted"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">
                     Race/Ethnicity
                   </label>
-                  <p className="mt-1">{formatRaceEthnicity(userData?.raceEthnicity)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This field cannot be changed after verification
-                  </p>
+                  <Input
+                    type="text"
+                    value={formatRaceEthnicity(userData?.raceEthnicity)}
+                    readOnly
+                    className="mt-1 bg-muted"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Zip Code</label>
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-1 flex items-center gap-2">
                     {editingZipCode ? (
                       <>
                         <Input
@@ -376,7 +400,12 @@ export default function ProfilePage() {
                       </>
                     ) : (
                       <>
-                        <p className="mt-1">{userData?.zipCode || "Not set"}</p>
+                        <Input
+                          type="text"
+                          value={userData?.zipCode || "Not set"}
+                          readOnly
+                          className="bg-muted flex-1"
+                        />
                         <Button
                           size="sm"
                           variant="outline"
@@ -390,9 +419,6 @@ export default function ProfilePage() {
                       </>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Used for demographic analysis. Can be updated later.
-                  </p>
                 </div>
               </div>
             </CardContent>
