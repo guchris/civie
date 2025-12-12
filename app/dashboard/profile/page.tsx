@@ -19,6 +19,7 @@ interface UserData {
   birthDate?: string;
   gender?: string;
   zipCode?: string;
+  raceEthnicity?: string;
   verified?: boolean;
   verifiedAt?: string;
   email?: string;
@@ -152,6 +153,24 @@ export default function ProfilePage() {
       "prefer-not-to-say": "Prefer not to say",
     };
     return genderMap[gender] || gender;
+  };
+
+  // Format race/ethnicity for display
+  const formatRaceEthnicity = (raceEthnicity?: string) => {
+    if (!raceEthnicity) return "N/A";
+    const raceMap: Record<string, string> = {
+      "american-indian-alaska-native": "American Indian or Alaska Native",
+      "asian": "Asian",
+      "black-african-american": "Black or African American",
+      "hispanic-latino": "Hispanic or Latino",
+      "middle-eastern-north-african": "Middle Eastern or North African",
+      "native-hawaiian-pacific-islander": "Native Hawaiian or Other Pacific Islander",
+      "white": "White",
+      "multiracial": "Multiracial",
+      "other": "Other",
+      "prefer-not-to-say": "Prefer not to say",
+    };
+    return raceMap[raceEthnicity] || raceEthnicity;
   };
 
   if (loading) {
@@ -301,6 +320,15 @@ export default function ProfilePage() {
                     Gender
                   </label>
                   <p className="mt-1">{formatGender(userData?.gender)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This field cannot be changed after verification
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Race/Ethnicity
+                  </label>
+                  <p className="mt-1">{formatRaceEthnicity(userData?.raceEthnicity)}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     This field cannot be changed after verification
                   </p>
