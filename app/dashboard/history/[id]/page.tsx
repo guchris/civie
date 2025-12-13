@@ -1,171 +1,131 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, BarChart3, Lock, ArrowLeft, Share2 } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowLeft, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Bar, BarChart, CartesianGrid, XAxis, LabelList } from "recharts";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-
-// Mock data - replace with real data from your backend
-// In production, this would be fetched based on the ID
-const pastQuestions = [
-  {
-    id: "q-2025-12-14",
-    date: "December 14, 2025",
-    question: "Do you support increasing the minimum wage in your state?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 62,
-      no: 28,
-      skip: 10,
-    },
-    totalResponses: 12473,
-    summary: "Increases the state minimum wage from the current $16 per hour to $18 per hour by January 1, 2026. Requires annual cost-of-living adjustments starting in 2027 based on the Consumer Price Index.",
-    yesMeaning: "The state minimum wage would increase to $18 per hour by 2026, with automatic annual increases tied to inflation starting in 2027.",
-    noMeaning: "The current minimum wage of $16 per hour would remain in effect. Future increases would continue to be determined by the state legislature.",
-    proArgument: "Proposition 28 ensures workers can keep up with rising costs of living. A higher minimum wage reduces poverty, stimulates local economies as workers spend more, and provides dignity to hardworking families.",
-    conArgument: "Prop. 28 will force small businesses to cut jobs, raise prices, or close entirely. The automatic increases remove flexibility during economic downturns.",
-  },
-  {
-    id: "q-2025-12-13",
-    date: "December 13, 2025",
-    question: "Should your city invest more in renewable energy infrastructure?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 75,
-      no: 20,
-      skip: 5,
-    },
-    totalResponses: 15234,
-  },
-  {
-    id: "q-2025-12-12",
-    date: "December 12, 2025",
-    question: "Do you believe your state should expand access to early childhood education?",
-    answered: false,
-    resultsUnlocked: true,
-    results: {
-      yes: 58,
-      no: 32,
-      skip: 10,
-    },
-    totalResponses: 9876,
-  },
-  {
-    id: "q-2025-12-11",
-    date: "December 11, 2025",
-    question: "Should your state implement stricter emissions standards for vehicles?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 68,
-      no: 25,
-      skip: 7,
-    },
-    totalResponses: 11234,
-  },
-  {
-    id: "q-2025-11-15",
-    date: "November 15, 2025",
-    question: "Do you support expanding public healthcare coverage?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 55,
-      no: 35,
-      skip: 10,
-    },
-    totalResponses: 8765,
-  },
-  {
-    id: "q-2025-11-14",
-    date: "November 14, 2025",
-    question: "Should your state increase funding for public libraries?",
-    answered: false,
-    resultsUnlocked: true,
-    results: {
-      yes: 71,
-      no: 22,
-      skip: 7,
-    },
-    totalResponses: 6543,
-  },
-  {
-    id: "q-2025-10-20",
-    date: "October 20, 2025",
-    question: "Do you support implementing a state-wide recycling program?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 82,
-      no: 12,
-      skip: 6,
-    },
-    totalResponses: 14321,
-  },
-];
-
-const chartConfig = {
-  percentage: {
-    label: "Percentage",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
-
-function ResultsChart({ results }: { results: { yes: number; no: number; skip: number } }) {
-  const chartData = [
-    {
-      response: "Yes",
-      percentage: results.yes,
-    },
-    {
-      response: "No",
-      percentage: results.no,
-    },
-    {
-      response: "Skip",
-      percentage: results.skip,
-    },
-  ];
-
-  return (
-    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
-        <CartesianGrid vertical={false} />
-        <XAxis
-          dataKey="response"
-          tickLine={false}
-          tickMargin={10}
-          axisLine={false}
-        />
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent hideLabel />}
-        />
-        <Bar dataKey="percentage" fill="var(--color-percentage)" radius={8}>
-          <LabelList
-            dataKey="percentage"
-            position="top"
-            formatter={(value: number) => `${value}%`}
-            className="fill-foreground text-xs"
-          />
-        </Bar>
-      </BarChart>
-    </ChartContainer>
-  );
-}
+import { useState, useEffect } from "react";
+import { format, parseISO } from "date-fns";
+import { db, doc, getDoc, collection, getDocs } from "@/lib/firebase";
+import { useUserData } from "@/hooks/use-user-data";
+import { QuestionData, AnswerOption } from "@/lib/question-presets";
+import { Spinner } from "@/components/ui/spinner";
+import { getTodayQuestionDate } from "@/lib/question-utils";
 
 export default function QuestionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const questionId = params.id as string;
+  const { userData, loading: userLoading } = useUserData();
+  const [question, setQuestion] = useState<QuestionData | null>(null);
+  const [answered, setAnswered] = useState(false);
+  const [skipped, setSkipped] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [answerPercentages, setAnswerPercentages] = useState<Record<string, number>>({});
+  const [skipPercentage, setSkipPercentage] = useState(0);
+  const [totalResponses, setTotalResponses] = useState(0);
 
-  const question = pastQuestions.find((q) => q.id === questionId);
+  // Extract date from questionId (format: q-YYYY-MM-DD)
+  const date = questionId.startsWith("q-") ? questionId.substring(2) : questionId;
+
+  // Fetch question and answer data from Firebase
+  useEffect(() => {
+    const fetchData = async () => {
+      if (userLoading) return;
+
+      try {
+        // Validate date format
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+          console.error("Invalid date format:", date);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch question
+        const questionRef = doc(db, "questions", date);
+        const questionSnap = await getDoc(questionRef);
+
+        if (questionSnap.exists()) {
+          const data = questionSnap.data() as QuestionData;
+          setQuestion(data);
+
+          // Check user's answer status
+          const userAnswer = userData?.answers?.[date];
+          if (userAnswer) {
+            setAnswered(userAnswer.status === "answered");
+            setSkipped(userAnswer.status === "skipped");
+          }
+
+          // Fetch responses for aggregation
+          // Only fetch if this is a past question (before today's question date)
+          const todayDate = getTodayQuestionDate();
+          if (date < todayDate) {
+            try {
+              const responsesRef = collection(db, "answers", date, "responses");
+              const responsesSnap = await getDocs(responsesRef);
+
+              // Count responses by answerOptionId
+              const counts: Record<string, number> = {};
+              let totalAnswered = 0;
+              let totalSkipped = 0;
+
+              responsesSnap.forEach((doc) => {
+                const responseData = doc.data();
+                const optionId = responseData.answerOptionId;
+                if (optionId === "skip") {
+                  totalSkipped++;
+                } else if (optionId) {
+                  counts[optionId] = (counts[optionId] || 0) + 1;
+                  totalAnswered++;
+                }
+              });
+
+              const total = totalAnswered + totalSkipped;
+
+              // Calculate percentages
+              const percentages: Record<string, number> = {};
+              if (total > 0) {
+                Object.keys(counts).forEach((optionId) => {
+                  percentages[optionId] = Math.round((counts[optionId] / total) * 100);
+                });
+                setSkipPercentage(Math.round((totalSkipped / total) * 100));
+              } else {
+                setSkipPercentage(0);
+              }
+
+              setAnswerPercentages(percentages);
+              setTotalResponses(total);
+            } catch (error) {
+              console.error("Error fetching responses:", error);
+              // If we can't fetch responses (e.g., permission denied), set defaults
+              setAnswerPercentages({});
+              setSkipPercentage(0);
+              setTotalResponses(0);
+            }
+          }
+        } else {
+          setQuestion(null);
+        }
+      } catch (error) {
+        console.error("Error fetching question:", error);
+        setQuestion(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [date, userData, userLoading]);
+
+  if (loading || userLoading) {
+    return (
+      <div className="container mx-auto max-w-7xl flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <Spinner />
+      </div>
+    );
+  }
 
   if (!question) {
     return (
@@ -181,6 +141,8 @@ export default function QuestionDetailPage() {
       </div>
     );
   }
+
+  const formattedDate = format(parseISO(date), "MMMM d, yyyy");
 
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -206,166 +168,83 @@ export default function QuestionDetailPage() {
       {/* Question Card */}
       <Card className="shadow-none">
         <CardHeader>
-          <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm mb-2">
-            {question.date}
+          <div className="flex items-center justify-between mb-2">
+            <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+              {formattedDate}
           </CardDescription>
-          <CardTitle className="text-base font-semibold leading-tight sm:text-xl lg:text-2xl text-left mb-4">
-            {question.question}
-          </CardTitle>
-          <div className="flex gap-2">
-            {question.answered ? (
-              <Badge variant="default" className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white">
+            {(answered || skipped) && (
+              <Badge 
+                variant={answered ? "default" : "secondary"} 
+                className={`flex items-center gap-1 text-xs ${answered ? "bg-green-600 hover:bg-green-700 text-white" : ""}`}
+              >
+                {answered ? (
+                  <>
                 <CheckCircle2 className="h-3 w-3" />
                 Answered
-              </Badge>
+                  </>
             ) : (
-              <Badge variant="secondary" className="flex items-center gap-1">
+                  <>
                 <XCircle className="h-3 w-3" />
                 Skipped
+                  </>
+                )}
               </Badge>
             )}
           </div>
+          <CardTitle className="text-base font-semibold leading-tight sm:text-xl lg:text-2xl text-left">
+            {question.question}
+          </CardTitle>
         </CardHeader>
-
-        <CardContent>
-          {/* Question content - empty for now, just the question title is shown */}
-        </CardContent>
-      </Card>
-
-      {/* Results Card */}
-      {question.resultsUnlocked && question.results ? (
-        <>
-          {/* Insights Cards */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card className="shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold">Total Responses</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {question.totalResponses?.toLocaleString() || "N/A"}
+        <CardContent className="space-y-4">
+          {/* Answer Options with Percentages */}
+          {question.answerOptions && question.answerOptions.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex flex-col gap-2">
+                {question.answerOptions
+                  .sort((a, b) => a.order - b.order)
+                  .map((option) => {
+                    const percentage = answerPercentages[option.id] || 0;
+                    return (
+                      <div
+                        key={option.id}
+                        className="relative w-full rounded-md border overflow-hidden px-3 py-2 text-xs font-medium sm:px-4 sm:text-sm border-input bg-background"
+                      >
+                        {/* Animated fill bar */}
+                        <div
+                          className="absolute inset-0 bg-primary/10 origin-left transition-all duration-1000 ease-out"
+                          style={{ width: `${percentage}%` }}
+                        />
+                        {/* Content */}
+                        <div className="relative flex items-center justify-between z-10">
+                          <span>{option.label}</span>
+                          <span className="text-muted-foreground">{percentage}%</span>
+                        </div>
                 </div>
-              </CardContent>
-            </Card>
-            <Card className="shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold">Majority Margin</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {(() => {
-                    const { yes, no } = question.results;
-                    const margin = Math.abs(yes - no);
-                    const winner = yes > no ? "Yes" : "No";
-                    return `${winner} leads by ${margin}%`;
-                  })()}
+                    );
+                  })}
+                {/* Skip row - always show at bottom */}
+                <div className="relative w-full rounded-md border overflow-hidden px-3 py-2 text-xs font-medium sm:px-4 sm:text-sm border-input bg-background">
+                  {/* Animated fill bar */}
+                  <div
+                    className="absolute inset-0 bg-primary/10 origin-left transition-all duration-1000 ease-out"
+                    style={{ width: `${skipPercentage}%` }}
+                  />
+                  {/* Content */}
+                  <div className="relative flex items-center justify-between z-10">
+                    <span>Skip</span>
+                    <span className="text-muted-foreground">{skipPercentage}%</span>
                 </div>
-              </CardContent>
-            </Card>
-            <Card className="shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold">Participation Level</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {(() => {
-                    const total = question.totalResponses || 0;
-                    if (total >= 10000) return "High";
-                    if (total >= 5000) return "Medium";
-                    return "Low";
-                  })()}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Results Chart Card */}
-          <Card className="shadow-none">
-            <CardHeader>
-              <CardTitle className="text-sm font-semibold sm:text-base">Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResultsChart results={question.results} />
-            </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-              <div className="text-muted-foreground leading-none">
-                Results are anonymized and aggregated. Your individual response is never stored.
               </div>
-            </CardFooter>
-          </Card>
-        </>
-      ) : (
-        <Card className="shadow-none">
-          <CardContent className="p-6 text-center">
-            <Lock className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
-            <p className="font-medium mb-2">Results unlock only when you participate</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Answer the question on the day it's asked to unlock anonymized results the next day.
-            </p>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/dashboard/data">View Open Datasets</Link>
-            </Button>
+              {totalResponses > 0 && (
+                <p className="text-xs text-muted-foreground mt-3">
+                  Based on {totalResponses.toLocaleString()} {totalResponses === 1 ? "response" : "responses"}
+              </p>
+              )}
+            </div>
+          )}
           </CardContent>
         </Card>
-      )}
-
-      {/* Additional Information Cards */}
-      {question.summary && (
-        <Card className="shadow-none">
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold sm:text-base">Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed">
-              {question.summary}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {question.yesMeaning && (
-        <Card className="shadow-none">
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold sm:text-base">What Your Vote Means</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium mb-2">YES</p>
-              <p className="text-sm leading-relaxed">
-                {question.yesMeaning}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium mb-2">NO</p>
-              <p className="text-sm leading-relaxed">
-                {question.noMeaning}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {question.proArgument && (
-        <Card className="shadow-none">
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold sm:text-base">Arguments</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium mb-2">PRO</p>
-              <p className="text-sm leading-relaxed">
-                {question.proArgument}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium mb-2">CON</p>
-              <p className="text-sm leading-relaxed">
-                {question.conArgument}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

@@ -49,7 +49,7 @@ function WelcomeBanner({
               <div>
                 <p className="text-xs font-medium text-green-900 dark:text-green-100">Answer within 24 hours</p>
                 <p className="text-xs text-green-800 dark:text-green-200 mt-0.5">
-                  You have until tomorrow at 2 AM to answer today's question.
+                  You have until tomorrow at 9 AM to answer today's question.
                 </p>
               </div>
             </div>

@@ -1,14 +1,14 @@
 /**
- * Calculate today's question date based on 2 AM local time cutoff
- * If current time is before 2 AM, use yesterday's date
- * If current time is 2 AM or later, use today's date
+ * Calculate today's question date based on 9 AM local time cutoff
+ * If current time is before 9 AM, use yesterday's date
+ * If current time is 9 AM or later, use today's date
  */
 export function getTodayQuestionDate(): string {
   const now = new Date();
   const localHour = now.getHours();
   
-  // If before 2 AM, use yesterday's date
-  if (localHour < 2) {
+  // If before 9 AM, use yesterday's date
+  if (localHour < 9) {
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
     return formatDateForQuestion(yesterday);
@@ -29,15 +29,23 @@ export function formatDateForQuestion(date: Date): string {
 }
 
 /**
- * Calculate the deadline for today's question (next day at 2 AM local time)
+ * Calculate the deadline for today's question (9 AM local time of the next day)
+ * If current time is before 9 AM, deadline is today at 9 AM
+ * If current time is 9 AM or later, deadline is tomorrow at 9 AM
  */
 export function getQuestionDeadline(): Date {
   const now = new Date();
   const deadline = new Date(now);
+  const localHour = now.getHours();
   
-  // Set deadline to next day at 2 AM
-  deadline.setDate(deadline.getDate() + 1);
-  deadline.setHours(2, 0, 0, 0);
+  if (localHour < 9) {
+    // Before 9 AM, deadline is today at 9 AM
+    deadline.setHours(9, 0, 0, 0);
+  } else {
+    // 9 AM or later, deadline is tomorrow at 9 AM
+    deadline.setDate(deadline.getDate() + 1);
+    deadline.setHours(9, 0, 0, 0);
+  }
   
   return deadline;
 }

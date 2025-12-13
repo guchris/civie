@@ -7,114 +7,85 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle2, XCircle, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
-import { format, parse } from "date-fns";
+import { format, parse, parseISO } from "date-fns";
 import Link from "next/link";
-
-// Mock data - replace with real data from your backend
-const pastQuestions = [
-  {
-    id: "q-2025-12-11",
-    date: "December 11, 2025",
-    dateObj: new Date(2025, 11, 11),
-    question: "Do you support increasing the minimum wage in your state?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 62,
-      no: 28,
-      unsure: 10,
-    },
-  },
-  {
-    id: "q-2025-12-10",
-    date: "December 10, 2025",
-    dateObj: new Date(2025, 11, 10),
-    question: "Should your city invest more in renewable energy infrastructure?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 75,
-      no: 20,
-      unsure: 5,
-    },
-  },
-  {
-    id: "q-2025-12-9",
-    date: "December 9, 2025",
-    dateObj: new Date(2025, 11, 9),
-    question: "Do you believe your state should expand access to early childhood education?",
-    answered: false,
-    resultsUnlocked: true,
-    results: {
-      yes: 58,
-      no: 32,
-      unsure: 10,
-    },
-  },
-  {
-    id: "q-2025-12-8",
-    date: "December 8, 2025",
-    dateObj: new Date(2025, 11, 8),
-    question: "Should your state implement stricter emissions standards for vehicles?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 68,
-      no: 25,
-      unsure: 7,
-    },
-  },
-  {
-    id: "q-2025-11-15",
-    date: "November 15, 2025",
-    dateObj: new Date(2025, 10, 15),
-    question: "Do you support expanding public healthcare coverage?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 55,
-      no: 35,
-      unsure: 10,
-    },
-  },
-  {
-    id: "q-2025-11-14",
-    date: "November 14, 2025",
-    dateObj: new Date(2025, 10, 14),
-    question: "Should your state increase funding for public libraries?",
-    answered: false,
-    resultsUnlocked: true,
-    results: {
-      yes: 71,
-      no: 22,
-      unsure: 7,
-    },
-  },
-  {
-    id: "q-2025-10-20",
-    date: "October 20, 2025",
-    dateObj: new Date(2025, 9, 20),
-    question: "Do you support implementing a state-wide recycling program?",
-    answered: true,
-    resultsUnlocked: true,
-    results: {
-      yes: 82,
-      no: 12,
-      unsure: 6,
-    },
-  },
-];
+import { db, collection, getDocs, query, where, orderBy } from "@/lib/firebase";
+import { useUserData } from "@/hooks/use-user-data";
+import { getTodayQuestionDate } from "@/lib/question-utils";
+import { QuestionData } from "@/lib/question-presets";
+import { Spinner } from "@/components/ui/spinner";
 
 type StatusFilter = "all" | "answered" | "skipped";
 
+interface HistoryQuestion {
+  id: string;
+  date: string;
+  dateObj: Date;
+  question: string;
+  answered: boolean;
+  skipped: boolean;
+}
+
 export default function HistoryPage() {
+  const { user, userData, loading: userLoading } = useUserData();
+  const [questions, setQuestions] = useState<HistoryQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
 
+  // Fetch past questions from Firebase
+  useEffect(() => {
+    const fetchPastQuestions = async () => {
+      if (userLoading) return;
+
+      try {
+        const todayDate = getTodayQuestionDate();
+        const questionsRef = collection(db, "questions");
+        
+        // Fetch all questions up to and including today's question date
+        const q = query(
+          questionsRef,
+          where("date", "<=", todayDate),
+          orderBy("date", "desc")
+        );
+        
+        const snapshot = await getDocs(q);
+        const questionsData: HistoryQuestion[] = [];
+        
+        snapshot.forEach((doc) => {
+          const data = doc.data() as QuestionData;
+          const dateObj = parseISO(data.date);
+          
+          // Check if user answered or skipped this question
+          const userAnswer = userData?.answers?.[data.date];
+          const answered = userAnswer?.status === "answered";
+          const skipped = userAnswer?.status === "skipped";
+          
+          questionsData.push({
+            id: `q-${data.date}`,
+            date: format(dateObj, "MMMM d, yyyy"),
+            dateObj,
+            question: data.question,
+            answered,
+            skipped,
+          });
+        });
+        
+        setQuestions(questionsData);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPastQuestions();
+  }, [userData, userLoading]);
+
   // Group questions by month
   const groupedQuestions = useMemo(() => {
-    let filtered = pastQuestions;
+    let filtered = questions;
 
     // Apply search filter
     if (searchQuery) {
@@ -127,11 +98,11 @@ export default function HistoryPage() {
     if (statusFilter === "answered") {
       filtered = filtered.filter((q) => q.answered);
     } else if (statusFilter === "skipped") {
-      filtered = filtered.filter((q) => !q.answered);
+      filtered = filtered.filter((q) => q.skipped);
     }
 
     // Group by month
-    const grouped: Record<string, typeof pastQuestions> = {};
+    const grouped: Record<string, HistoryQuestion[]> = {};
     filtered.forEach((q) => {
       const monthKey = format(q.dateObj, "yyyy-MM");
       if (!grouped[monthKey]) {
@@ -145,8 +116,8 @@ export default function HistoryPage() {
       grouped[key].sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
     });
 
-    return Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a));
-  }, [searchQuery, statusFilter]);
+    return Object.entries(grouped).sort(([a]: [string, HistoryQuestion[]], [b]: [string, HistoryQuestion[]]) => b.localeCompare(a));
+  }, [questions, searchQuery, statusFilter]);
 
   // Reset to first month when filters change
   useEffect(() => {
@@ -169,6 +140,14 @@ export default function HistoryPage() {
       setCurrentMonthIndex(currentMonthIndex - 1);
     }
   };
+
+  if (loading || userLoading) {
+    return (
+      <div className="container mx-auto max-w-7xl flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">

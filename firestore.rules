@@ -19,10 +19,12 @@ service cloud.firestore {
       allow write: if request.auth != null && isAdmin();
     }
     
-    // Answers collection - users can write their own responses, admins can read for aggregation
+    // Answers collection - users can write their own responses
+    // Users can read responses for past questions (to see aggregated results)
+    // Admins can read all responses for aggregation
     match /answers/{date}/responses/{responseId} {
       allow write: if request.auth != null;
-      allow read: if request.auth != null && isAdmin();
+      allow read: if request.auth != null;
     }
     
     // Deny all other access by default
