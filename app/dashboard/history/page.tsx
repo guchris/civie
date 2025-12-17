@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, XCircle, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, XCircle, Search, ChevronLeft, ChevronRight, Minus } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { format, parse, parseISO } from "date-fns";
 import Link from "next/link";
@@ -20,6 +20,7 @@ type StatusFilter = "all" | "answered" | "skipped";
 interface HistoryQuestion {
   id: string;
   date: string;
+  rawDate: string; // YYYY-MM-DD format
   dateObj: Date;
   question: string;
   answered: boolean;
@@ -63,8 +64,9 @@ export default function HistoryPage() {
           const skipped = userAnswer?.status === "skipped";
           
           questionsData.push({
-            id: `q-${data.date}`,
+            id: data.date,
             date: format(dateObj, "MMMM d, yyyy"),
+            rawDate: data.date,
             dateObj,
             question: data.question,
             answered,
@@ -210,19 +212,55 @@ export default function HistoryPage() {
           {/* Questions for current month */}
           <div className="space-y-2">
             {currentMonth[1].map((question) => {
-              // Determine status indicator - all questions in history have results available
+              const todayDate = getTodayQuestionDate();
+              const isPending = question.rawDate === todayDate;
+              
+              // Determine status indicator based on answered/skipped/missed status
+              const isMissed = !question.answered && !question.skipped && !isPending;
               let statusIcon = null;
               let statusColor = "";
               if (question.answered) {
                 statusIcon = <CheckCircle2 className="h-4 w-4" />;
                 statusColor = "text-green-600";
-              } else {
+              } else if (question.skipped) {
                 statusIcon = <XCircle className="h-4 w-4" />;
+                statusColor = "text-muted-foreground";
+              } else {
+                // Missed or pending - show dash for missed
+                statusIcon = <Minus className="h-4 w-4" />;
                 statusColor = "text-muted-foreground";
               }
 
               // Get day number
               const dayNumber = format(question.dateObj, "d");
+
+              // Render as non-clickable card if pending, skipped, or missed
+              if (isPending || question.skipped || isMissed) {
+                return (
+                  <Card key={question.id} className="shadow-none opacity-60 cursor-not-allowed">
+                    <CardContent>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-sm font-medium text-muted-foreground w-6">
+                            {dayNumber}
+                          </span>
+                          <div className={statusColor}>
+                            {statusIcon}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-base font-medium line-clamp-2">
+                            {question.question}
+                          </p>
+                        </div>
+                        {isPending && (
+                          <span className="text-xs text-muted-foreground shrink-0">Results pending</span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }
 
               return (
                 <Link key={question.id} href={`/dashboard/history/${question.id}`} className="block">

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, ArrowLeft, Share2 } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowLeft, Share2, Clock } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -27,8 +27,8 @@ export default function QuestionDetailPage() {
   const [skipPercentage, setSkipPercentage] = useState(0);
   const [totalResponses, setTotalResponses] = useState(0);
 
-  // Extract date from questionId (format: q-YYYY-MM-DD)
-  const date = questionId.startsWith("q-") ? questionId.substring(2) : questionId;
+  // The questionId is now directly the date (YYYY-MM-DD format)
+  const date = questionId;
 
   // Fetch question and answer data from Firebase
   useEffect(() => {
@@ -143,6 +143,48 @@ export default function QuestionDetailPage() {
   }
 
   const formattedDate = format(parseISO(date), "MMMM d, yyyy");
+  const todayDate = getTodayQuestionDate();
+  const isPending = date === todayDate;
+
+  // If this is today's question, show pending state
+  if (isPending) {
+    return (
+      <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+            className="shadow-none"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+        </div>
+
+        <Card className="shadow-none">
+          <CardHeader>
+            <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+              {formattedDate}
+            </CardDescription>
+            <CardTitle className="text-base font-semibold leading-tight sm:text-xl lg:text-2xl text-left">
+              {question.question}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center py-8">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-amber-500" />
+              </div>
+              <p className="text-muted-foreground">Results will be available soon</p>
+              <Button asChild variant="outline" className="mt-2">
+                <Link href="/dashboard/history">Back to History</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">

@@ -257,6 +257,39 @@ export default function DataPage() {
         <h1 className="text-xl font-bold tracking-tight">Open Data</h1>
       </div>
 
+      {/* About This Data */}
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle>About This Data</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Civie makes all polling data openly available for public use. Every response collected 
+            through our daily civic questions is aggregated and published here, enabling researchers, 
+            journalists, civic organizations, and the public to analyze and understand public opinion 
+            on the issues that matter.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">Anonymized.</span> Responses are never linked to individual users. Only demographic labels are included.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">Verified.</span> All respondents are verified with government-issued ID to ensure data integrity and prevent spam.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">Open Access.</span> This data is released under the{" "}
+            <a 
+              href="https://creativecommons.org/licenses/by/4.0/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline hover:text-foreground"
+            >
+              CC BY 4.0
+            </a>{" "}
+            license. You are free to use, share, and adapt it for any purpose with appropriate attribution.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Data Format */}
       <Card className="shadow-none">
         <CardHeader>
@@ -451,7 +484,7 @@ yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
                 ) : (
                   <>
                 <Download className="h-4 w-4 mr-2" />
-                    Download All
+                    Download
                   </>
                 )}
               </Button>
