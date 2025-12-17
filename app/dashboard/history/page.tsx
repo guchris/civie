@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, XCircle, Search, ChevronLeft, ChevronRight, Minus } from "lucide-react";
+import { CheckCircle2, CircleMinus, CircleDashed, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { format, parse, parseISO } from "date-fns";
 import Link from "next/link";
@@ -223,11 +223,11 @@ export default function HistoryPage() {
                 statusIcon = <CheckCircle2 className="h-4 w-4" />;
                 statusColor = "text-green-600";
               } else if (question.skipped) {
-                statusIcon = <XCircle className="h-4 w-4" />;
-                statusColor = "text-muted-foreground";
+                statusIcon = <CircleMinus className="h-4 w-4" />;
+                statusColor = "text-green-600";
               } else {
-                // Missed or pending - show dash for missed
-                statusIcon = <Minus className="h-4 w-4" />;
+                // Missed or pending
+                statusIcon = <CircleDashed className="h-4 w-4" />;
                 statusColor = "text-muted-foreground";
               }
 
