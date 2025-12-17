@@ -234,8 +234,8 @@ export default function HistoryPage() {
               // Get day number
               const dayNumber = format(question.dateObj, "d");
 
-              // Render as non-clickable card if pending, skipped, or missed
-              if (isPending || question.skipped || isMissed) {
+              // Render as non-clickable card if pending or missed
+              if (isPending || isMissed) {
                 return (
                   <Card key={question.id} className="shadow-none opacity-60 cursor-not-allowed">
                     <CardContent>

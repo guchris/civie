@@ -145,6 +145,47 @@ export default function QuestionDetailPage() {
   const formattedDate = format(parseISO(date), "MMMM d, yyyy");
   const todayDate = getTodayQuestionDate();
   const isPending = date === todayDate;
+  const isMissed = !answered && !skipped && !isPending;
+
+  // If user missed this question, don't show results
+  if (isMissed) {
+    return (
+      <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+            className="shadow-none"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+        </div>
+
+        <Card className="shadow-none">
+          <CardHeader>
+            <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+              {formattedDate}
+            </CardDescription>
+            <CardTitle className="text-base font-semibold leading-tight sm:text-xl lg:text-2xl text-left">
+              {question.question}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center py-8">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                <XCircle className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground">You missed this question</p>
+              <Button asChild variant="outline" className="mt-2">
+                <Link href="/dashboard/history">Back to History</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // If this is today's question, show pending state
   if (isPending) {
