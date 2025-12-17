@@ -252,10 +252,10 @@ export default function HistoryPage() {
                           <p className="text-base font-medium line-clamp-2">
                             {question.question}
                           </p>
+                          {isPending && (
+                            <p className="text-xs text-muted-foreground mt-1">Results pending</p>
+                          )}
                         </div>
-                        {isPending && (
-                          <span className="text-xs text-muted-foreground shrink-0">Results pending</span>
-                        )}
                       </div>
                     </CardContent>
                   </Card>
