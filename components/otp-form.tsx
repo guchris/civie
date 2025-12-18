@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ConfirmationResult } from "firebase/auth";
-import { auth, db, doc, getDoc } from "@/lib/firebase";
+import { auth, db, doc, getDoc, setDoc } from "@/lib/firebase";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,23 @@ export function OTPForm({ className, phoneNumber: propPhoneNumber, ...props }: O
       if (typeof window !== "undefined") {
         window.localStorage.removeItem("phoneForSignIn");
         delete window.__firebaseConfirmationResult;
+      }
+
+      // Save phone number to Firestore if available from Firebase Auth
+      if (user.phoneNumber) {
+        try {
+          await setDoc(
+            doc(db, "users", user.uid),
+            {
+              phoneNumber: user.phoneNumber,
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+        } catch (error) {
+          console.error("Error saving phone number:", error);
+          // Continue even if saving phone number fails
+        }
       }
 
       // Check if user is already verified

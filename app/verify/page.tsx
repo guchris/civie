@@ -71,6 +71,9 @@ export default function VerifyPage() {
         throw new Error("User not authenticated");
       }
 
+      // Get phone number from Firebase Auth if available
+      const phoneNumber = user.phoneNumber || undefined;
+
       // Save user identity data to Firestore
       const userData = {
         fullName,
@@ -78,6 +81,7 @@ export default function VerifyPage() {
         gender,
         zipCode,
         raceEthnicity,
+        phoneNumber, // Save phone number from Firebase Auth
         verified: true,
         verifiedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),

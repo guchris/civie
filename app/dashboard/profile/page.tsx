@@ -52,7 +52,9 @@ export default function ProfilePage() {
           if (hookUserData) {
             setUserData(hookUserData as UserData);
             setZipCodeValue(hookUserData.zipCode || "");
-            setPhoneNumberValue(hookUserData.phoneNumber || "");
+            // Use phone number from Firestore, or fallback to Firebase Auth
+            const phoneNumber = hookUserData.phoneNumber || user.phoneNumber || "";
+            setPhoneNumberValue(phoneNumber);
             
             // Load notification preferences (default to all enabled if not set)
             if (hookUserData.notifications) {
@@ -99,9 +101,11 @@ export default function ProfilePage() {
             setUserData({
               ...data,
               email: user.email || undefined,
+              // Use phone number from Firestore, or fallback to Firebase Auth
+              phoneNumber: data.phoneNumber || user.phoneNumber || undefined,
             } as UserData);
             setZipCodeValue(data.zipCode || "");
-            setPhoneNumberValue(data.phoneNumber || "");
+            setPhoneNumberValue(data.phoneNumber || user.phoneNumber || "");
               
               // Load notification preferences
               if (data.notifications) {

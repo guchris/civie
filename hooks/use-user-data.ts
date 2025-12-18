@@ -57,6 +57,8 @@ export function useUserData() {
             setUserData({
               ...data,
               email: firebaseUser.email || undefined,
+              // Use phone number from Firebase Auth if not in Firestore
+              phoneNumber: data.phoneNumber || firebaseUser.phoneNumber || undefined,
             } as UserData);
           } else {
             // User document doesn't exist yet
