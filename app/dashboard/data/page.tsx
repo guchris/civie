@@ -243,10 +243,8 @@ export default function DataPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center p-12">
-          <Spinner />
-        </div>
+      <div className="container mx-auto max-w-7xl flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <Spinner />
       </div>
     );
   }

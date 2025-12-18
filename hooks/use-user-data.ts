@@ -20,6 +20,8 @@ export interface UserData {
   verified?: boolean;
   verifiedAt?: string;
   email?: string;
+  phoneNumber?: string; // E.164 format (e.g., +1234567890)
+  timezone?: string; // IANA timezone (e.g., 'America/New_York')
   answers?: Record<string, UserAnswer>; // date -> answer mapping
   hasSeenWelcomeBanner?: boolean;
   notifications?: {
