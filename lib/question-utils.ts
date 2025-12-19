@@ -136,33 +136,34 @@ export function calculateUserStats(answers: Record<string, UserAnswer> | undefin
   ).length;
 
   // Calculate streak
+  // Streak counts both "answered" and "skipped" as valid (user engaged with the question)
   let streak = 0;
   let currentDate = getTodayQuestionDate();
   
-  // Check if today is answered - if not, start from yesterday
+  // Check if today has an answer (answered or skipped) - if not, start from yesterday
   const todayAnswer = answers[currentDate];
-  if (todayAnswer?.status === "answered") {
+  if (todayAnswer && (todayAnswer.status === "answered" || todayAnswer.status === "skipped")) {
     streak = 1;
   } else {
-    // Start from yesterday if today not answered
+    // Start from yesterday if today not answered/skipped
     currentDate = getPreviousDate(currentDate);
-    // Check if yesterday is answered, if not streak is 0
+    // Check if yesterday has an answer, if not streak is 0
     const yesterdayAnswer = answers[currentDate];
-    if (yesterdayAnswer?.status !== "answered") {
+    if (!yesterdayAnswer || (yesterdayAnswer.status !== "answered" && yesterdayAnswer.status !== "skipped")) {
       return { streak: 0, totalAnswered };
     }
     streak = 1;
   }
 
-  // Go backwards day by day, counting consecutive answered days
+  // Go backwards day by day, counting consecutive days with answers (answered or skipped)
   while (true) {
     currentDate = getPreviousDate(currentDate);
     const answer = answers[currentDate];
     
-    if (answer?.status === "answered") {
+    if (answer && (answer.status === "answered" || answer.status === "skipped")) {
       streak++;
     } else {
-      // Stop at first skipped or missing day
+      // Stop at first missing day (no answer at all)
       break;
     }
   }

@@ -85,6 +85,7 @@ export default function DataPage() {
           // Only include questions from the past (before today's question date)
           if (data.date < todayQuestionDate) {
             // Count responses for this question
+            // Note: Querying a non-existent subcollection returns an empty snapshot, not an error
             try {
               const responsesRef = collection(db, "answers", data.date, "responses");
               const responsesSnapshot = await getDocs(responsesRef);
@@ -93,7 +94,9 @@ export default function DataPage() {
                 responseCount: responsesSnapshot.size,
               });
             } catch (error) {
-              // If no responses exist yet, count is 0
+              // Log unexpected errors (network issues, etc.)
+              console.error(`Error fetching responses for ${data.date}:`, error);
+              // Still show the question with 0 count if there's an error
               questionsData.push({
                 ...data,
                 responseCount: 0,
@@ -266,13 +269,13 @@ export default function DataPage() {
             journalists, civic organizations, and the public to analyze and understand public opinion 
             on the issues that matter.
           </p>
-          <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
             <span className="font-semibold text-foreground">Anonymized.</span> Responses are never linked to individual users. Only demographic labels are included.
-          </p>
-          <p className="text-sm text-muted-foreground">
+            </p>
+            <p className="text-sm text-muted-foreground">
             <span className="font-semibold text-foreground">Verified.</span> All respondents are verified with government-issued ID to ensure data integrity and prevent spam.
-          </p>
-          <p className="text-sm text-muted-foreground">
+            </p>
+            <p className="text-sm text-muted-foreground">
             <span className="font-semibold text-foreground">Open Access.</span> This data is released under the{" "}
             <a 
               href="https://creativecommons.org/licenses/by/4.0/" 
@@ -283,7 +286,7 @@ export default function DataPage() {
               CC BY 4.0
             </a>{" "}
             license. You are free to use, share, and adapt it for any purpose with appropriate attribution.
-          </p>
+            </p>
         </CardContent>
       </Card>
 
@@ -439,8 +442,8 @@ yes,Yes,32,Male,White,90210,2024-01-15T14:30:00.000Z
 no,No,28,Female,Hispanic,10001,2024-01-15T15:45:00.000Z
 yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
                   </pre>
-                </div>
-              </div>
+            </div>
+          </div>
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -519,8 +522,8 @@ yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {question.responseCount} response{question.responseCount !== 1 ? "s" : ""}
-                    </p>
-                  </div>
+            </p>
+          </div>
                   <div className="flex items-center gap-2 flex-shrink-0 sm:ml-4">
                     <Button
                       variant="outline"
@@ -542,7 +545,7 @@ yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
                       )}
                     </Button>
                   </div>
-                </div>
+          </div>
               );
             })
           )}

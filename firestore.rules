@@ -20,10 +20,15 @@ service cloud.firestore {
     }
     
     // Answers collection - users can write their own responses
-    // Users can read responses for past questions (to see aggregated results)
-    // Admins can read all responses for aggregation
+    // All authenticated users can read responses (for open data access)
+    // Note: This allows any authenticated user to access aggregated response data
     match /answers/{date}/responses/{responseId} {
       allow write: if request.auth != null;
+      allow read: if request.auth != null;
+    }
+    
+    // Allow reading the parent answers/{date} document if needed for subcollection queries
+    match /answers/{date} {
       allow read: if request.auth != null;
     }
     
