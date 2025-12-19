@@ -219,7 +219,7 @@ export function LoginForm({
                 placeholder="Enter your beta code"
                 value={betaCode}
                 onChange={(e) => {
-                  setBetaCode(e.target.value);
+                  setBetaCode(e.target.value.toLowerCase());
                   setBetaCodeValid(null);
                   setBetaCodeError(null);
                 }}

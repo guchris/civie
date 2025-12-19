@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Get valid beta codes from environment variable (case-sensitive)
-const validBetaCodes = process.env.BETA_CODES?.split(",").map(code => code.trim()) || [];
+// Get valid beta codes from environment variable (case-insensitive comparison)
+const validBetaCodes = process.env.BETA_CODES?.split(",").map(code => code.trim().toLowerCase()) || [];
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const trimmedCode = code.trim();
+    const trimmedCode = code.trim().toLowerCase();
     const isValid = validBetaCodes.includes(trimmedCode);
 
     return NextResponse.json({ valid: isValid });
