@@ -26,9 +26,6 @@ export default function ProfilePage() {
   const [editingZipCode, setEditingZipCode] = useState(false);
   const [zipCodeValue, setZipCodeValue] = useState("");
   const [savingZipCode, setSavingZipCode] = useState(false);
-  const [editingPhoneNumber, setEditingPhoneNumber] = useState(false);
-  const [phoneNumberValue, setPhoneNumberValue] = useState("");
-  const [savingPhoneNumber, setSavingPhoneNumber] = useState(false);
   
   // Notification preferences state (default to all enabled)
   const [notifications, setNotifications] = useState({
@@ -52,9 +49,6 @@ export default function ProfilePage() {
           if (hookUserData) {
             setUserData(hookUserData as UserData);
             setZipCodeValue(hookUserData.zipCode || "");
-            // Use phone number from Firestore, or fallback to Firebase Auth
-            const phoneNumber = hookUserData.phoneNumber || user.phoneNumber || "";
-            setPhoneNumberValue(phoneNumber);
             
             // Load notification preferences (default to all enabled if not set)
             if (hookUserData.notifications) {
@@ -101,11 +95,8 @@ export default function ProfilePage() {
             setUserData({
               ...data,
               email: user.email || undefined,
-              // Use phone number from Firestore, or fallback to Firebase Auth
-              phoneNumber: data.phoneNumber || user.phoneNumber || undefined,
             } as UserData);
             setZipCodeValue(data.zipCode || "");
-            setPhoneNumberValue(data.phoneNumber || user.phoneNumber || "");
               
               // Load notification preferences
               if (data.notifications) {
@@ -167,46 +158,6 @@ export default function ProfilePage() {
       alert("Failed to update zip code. Please try again.");
     } finally {
       setSavingZipCode(false);
-    }
-  };
-
-  const handleUpdatePhoneNumber = async () => {
-    if (!isAuthenticated || !auth.currentUser) return;
-
-    setSavingPhoneNumber(true);
-    try {
-      const user = auth.currentUser;
-      // Normalize phone number (basic validation - you may want to enhance this)
-      const normalizedPhone = phoneNumberValue.trim();
-      
-      // Basic validation - should start with + and have digits
-      if (normalizedPhone && !normalizedPhone.startsWith('+')) {
-        alert("Phone number must be in international format (e.g., +1234567890)");
-        setSavingPhoneNumber(false);
-        return;
-      }
-
-      await setDoc(
-        doc(db, "users", user.uid),
-        {
-          phoneNumber: normalizedPhone || null,
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true }
-      );
-
-      // Update local state
-      setUserData((prev) => ({
-        ...prev,
-        phoneNumber: normalizedPhone || undefined,
-      }));
-
-      setEditingPhoneNumber(false);
-    } catch (error) {
-      console.error("Error updating phone number:", error);
-      alert("Failed to update phone number. Please try again.");
-    } finally {
-      setSavingPhoneNumber(false);
     }
   };
 
@@ -513,70 +464,6 @@ export default function ProfilePage() {
                       </>
                     )}
                   </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Phone Number</label>
-                  <div className="mt-1 flex items-center gap-2">
-                    {editingPhoneNumber ? (
-                      <>
-                        <Input
-                          type="tel"
-                          value={phoneNumberValue}
-                          onChange={(e) => setPhoneNumberValue(e.target.value)}
-                          placeholder="+1234567890"
-                          className="flex-1"
-                          disabled={savingPhoneNumber}
-                        />
-                        <Button
-                          size="sm"
-                          onClick={handleUpdatePhoneNumber}
-                          disabled={savingPhoneNumber}
-                        >
-                          {savingPhoneNumber ? (
-                            <>
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                              Saving...
-                            </>
-                          ) : (
-                            "Save"
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingPhoneNumber(false);
-                            setPhoneNumberValue(userData?.phoneNumber || "");
-                          }}
-                          disabled={savingPhoneNumber}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Input
-                          type="tel"
-                          value={userData?.phoneNumber || "Not set"}
-                          readOnly
-                          className="bg-muted flex-1 shadow-none"
-                        />
-                        <Button
-                          variant="outline"
-                          className="shadow-none"
-                          onClick={() => {
-                            setEditingPhoneNumber(true);
-                            setPhoneNumberValue(userData?.phoneNumber || "");
-                          }}
-                        >
-                          Edit
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Required for SMS notifications. Use international format (e.g., +1234567890). Notifications are sent daily at 9:05 AM UTC.
-                  </p>
                 </div>
               </div>
             </CardContent>
