@@ -15,7 +15,7 @@ import { getTodayQuestionDate } from "@/lib/question-utils";
 import { QuestionData } from "@/lib/question-presets";
 import { Spinner } from "@/components/ui/spinner";
 
-type StatusFilter = "all" | "answered" | "skipped";
+type StatusFilter = "all" | "answered" | "skipped" | "missed";
 
 interface HistoryQuestion {
   id: string;
@@ -101,6 +101,12 @@ export default function HistoryPage() {
       filtered = filtered.filter((q) => q.answered);
     } else if (statusFilter === "skipped") {
       filtered = filtered.filter((q) => q.skipped);
+    } else if (statusFilter === "missed") {
+      const todayDate = getTodayQuestionDate();
+      filtered = filtered.filter((q) => {
+        const isPending = q.rawDate === todayDate;
+        return !q.answered && !q.skipped && !isPending;
+      });
     }
 
     // Group by month
@@ -174,6 +180,7 @@ export default function HistoryPage() {
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="answered">Answered</TabsTrigger>
           <TabsTrigger value="skipped">Skipped</TabsTrigger>
+          <TabsTrigger value="missed">Missed</TabsTrigger>
         </TabsList>
       </Tabs>
 

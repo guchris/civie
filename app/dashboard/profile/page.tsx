@@ -306,7 +306,7 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{userStats.totalAnswered}</div>
-                <p className="text-xs text-muted-foreground">Questions answered</p>
+                <p className="text-xs text-muted-foreground">Questions engaged with</p>
               </CardContent>
             </Card>
           </div>

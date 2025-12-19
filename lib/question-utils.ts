@@ -130,9 +130,9 @@ export function calculateUserStats(answers: Record<string, UserAnswer> | undefin
     return { streak: 0, totalAnswered: 0 };
   }
 
-  // Calculate total answered
+  // Calculate total answered (includes both answered and skipped - user engaged with questions)
   const totalAnswered = Object.values(answers).filter(
-    (answer) => answer.status === "answered"
+    (answer) => answer.status === "answered" || answer.status === "skipped"
   ).length;
 
   // Calculate streak
