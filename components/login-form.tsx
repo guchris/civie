@@ -22,17 +22,77 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Check, Loader2 } from "lucide-react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const [betaCode, setBetaCode] = useState("");
+  const [betaCodeValid, setBetaCodeValid] = useState<boolean | null>(null);
+  const [isValidatingBetaCode, setIsValidatingBetaCode] = useState(false);
+  const [betaCodeError, setBetaCodeError] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Validate beta code
+  const validateBetaCode = async (code: string) => {
+    if (!code.trim()) {
+      setBetaCodeValid(null);
+      setBetaCodeError(null);
+      return;
+    }
+
+    setIsValidatingBetaCode(true);
+    setBetaCodeError(null);
+
+    try {
+      // Trim code for exact match (case-sensitive)
+      const trimmedCode = code.trim();
+      const response = await fetch("/api/validate-beta-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: trimmedCode }),
+      });
+
+      const data = await response.json();
+
+      if (data.valid) {
+        setBetaCodeValid(true);
+        setBetaCodeError(null);
+      } else {
+        setBetaCodeValid(false);
+        setBetaCodeError("Invalid beta code. Please check and try again.");
+      }
+    } catch (error) {
+      console.error("Error validating beta code:", error);
+      setBetaCodeValid(false);
+      setBetaCodeError("Failed to validate beta code. Please try again.");
+    } finally {
+      setIsValidatingBetaCode(false);
+    }
+  };
+
+  const handleBetaCodeBlur = () => {
+    if (betaCode.trim()) {
+      validateBetaCode(betaCode);
+    }
+  };
+
+  const handleBetaCodeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (betaCode.trim()) {
+        validateBetaCode(betaCode);
+      }
+    }
+  };
 
   // Initialize reCAPTCHA verifier - following Firebase documentation pattern
   useEffect(() => {
@@ -151,6 +211,50 @@ export function LoginForm({
             <h1 className="text-xl font-bold">Welcome to civie</h1>
           </div>
           <Field>
+            <FieldLabel htmlFor="betaCode">Beta Code</FieldLabel>
+            <div className="relative">
+              <Input
+                id="betaCode"
+                type="text"
+                placeholder="Enter your beta code"
+                value={betaCode}
+                onChange={(e) => {
+                  setBetaCode(e.target.value);
+                  setBetaCodeValid(null);
+                  setBetaCodeError(null);
+                }}
+                onBlur={handleBetaCodeBlur}
+                onKeyDown={handleBetaCodeKeyDown}
+                className={cn(
+                  "pr-10",
+                  betaCodeValid === true && "border-green-500",
+                  betaCodeValid === false && "border-destructive"
+                )}
+                required
+              />
+              {isValidatingBetaCode && (
+                <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+              )}
+              {!isValidatingBetaCode && betaCodeValid === true && (
+                <Check className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-green-500" />
+              )}
+            </div>
+            {betaCodeError && (
+              <p className="text-sm text-destructive mt-1">{betaCodeError}</p>
+            )}
+            <FieldDescription>
+              Don't have a beta code?{" "}
+              <Link
+                href="https://docs.google.com/forms/d/e/1FAIpQLSeYSquOqcAmSwOrgbqj5w4WXyjNXVbElp0HXJc_VyuK3iTU5Q/viewform?usp=header"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:no-underline"
+              >
+                Join the waitlist
+              </Link>
+            </FieldDescription>
+          </Field>
+          <Field>
             <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
             <Input
               id="phone"
@@ -158,6 +262,7 @@ export function LoginForm({
               placeholder="+1 (555) 123-4567"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
+              disabled={betaCodeValid !== true}
               required
             />
             <FieldDescription>
@@ -170,7 +275,7 @@ export function LoginForm({
             </div>
           )}
           <Field>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || betaCodeValid !== true}>
               {isLoading ? "Sending code..." : "Send verification code"}
             </Button>
           </Field>
