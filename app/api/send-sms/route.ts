@@ -9,15 +9,21 @@ import { getTodayQuestionDate } from '@/lib/question-utils';
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify the request has proper authorization
-    const authHeader = request.headers.get('authorization');
-    const expectedToken = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
+    // Check for test mode (allows bypassing auth for testing)
+    const { searchParams } = new URL(request.url);
+    const isTestMode = searchParams.get('test') === 'true';
     
-    if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // Verify the request has proper authorization (unless in test mode)
+    if (!isTestMode) {
+      const authHeader = request.headers.get('authorization');
+      const expectedToken = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
+      
+      if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
     }
 
     const todayDate = getTodayQuestionDate();

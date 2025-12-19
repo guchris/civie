@@ -10,15 +10,22 @@ import { getTodayQuestionDate } from '@/lib/question-utils';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verify this is a cron request from Vercel
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
+    // Check for test mode (allows bypassing auth for testing)
+    const { searchParams } = new URL(request.url);
+    const isTestMode = searchParams.get('test') === 'true';
     
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // Verify this is a cron request from Vercel (unless in test mode)
+    if (!isTestMode) {
+      const authHeader = request.headers.get('authorization');
+      const cronSecret = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
+      
+      // Note: Vercel automatically sets VERCEL_CRON_SECRET for cron jobs
+      if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
     }
 
     const now = new Date();
