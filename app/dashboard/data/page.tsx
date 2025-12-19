@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, FileText, Database, Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { db, collection, getDocs, query, orderBy } from "@/lib/firebase";
 import { QuestionData } from "@/lib/question-presets";
 import { format, parseISO } from "date-fns";
@@ -456,21 +455,18 @@ yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="flex items-center gap-4">
-              <Database className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Complete Dataset</p>
-                <p className="text-sm text-muted-foreground">
-                  All questions and responses in a single CSV file
-                </p>
-              </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-lg border p-4">
+            <div className="min-w-0">
+              <p className="font-medium">Complete Dataset</p>
+              <p className="text-sm text-muted-foreground">
+                All questions and responses in a single CSV file
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">CSV</Badge>
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Button 
                 variant="outline" 
                 size="sm"
+                className="shadow-none"
                 onClick={handleDownloadAll}
                 disabled={downloadingAll || questions.length === 0}
               >
@@ -512,27 +508,24 @@ yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
               return (
                 <div
                   key={question.date}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-lg border p-4"
                 >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">
-                        {format(dateObj, "MMMM d, yyyy")}
-                      </p>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {question.question}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {question.responseCount} response{question.responseCount !== 1 ? "s" : ""}
-            </p>
-          </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {format(dateObj, "MMMM d, yyyy")}
+                    </p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {question.question}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {question.responseCount} response{question.responseCount !== 1 ? "s" : ""}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-                    <Badge variant="secondary">CSV</Badge>
+                  <div className="flex items-center gap-2 flex-shrink-0 sm:ml-4">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="shadow-none"
                       onClick={() => handleDownloadQuestion(question)}
                       disabled={isDownloading || question.responseCount === 0}
                     >
@@ -549,7 +542,7 @@ yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
                       )}
                     </Button>
                   </div>
-          </div>
+                </div>
               );
             })
           )}
