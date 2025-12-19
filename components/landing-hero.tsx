@@ -67,7 +67,7 @@ export function LandingHero() {
           <CardContent className="p-0">
             <h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl relative inline-block">
               Your say, every day.
-              <span className="absolute bottom-0 left-0 w-0 h-1 bg-foreground transition-all duration-500 ease-out group-hover:w-full"></span>
+              <span className="absolute bottom-0 left-0 w-0 h-1 bg-foreground transition-all duration-500 ease-out group-hover:w-full group-active:w-full"></span>
             </h2>
           </CardContent>
         </Card>
@@ -76,17 +76,17 @@ export function LandingHero() {
         <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-1 sm:col-span-1 sm:p-10 md:p-12 lg:p-6 lg:col-span-1 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group">
           <CardContent className="p-0">
             <p className="text-lg font-bold sm:text-2xl">
-              <span className="transition-all duration-300 group-hover:blur-[2px]">Anonymous</span> civic dialogue.
+              <span className="transition-all duration-300 group-hover:blur-[2px] group-active:blur-[2px]">Anonymous</span> civic dialogue.
             </p>
           </CardContent>
         </Card>
 
         {/* Login Card - Replaces Privacy/Theme position */}
         <Link href="/login" className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 group">
-          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent dark:bg-black dark:hover:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
+          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
             <CardContent className="p-0">
               <span className="text-xl font-bold sm:text-2xl lg:text-3xl">Login</span>
-              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
+              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite] group-active:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
             </CardContent>
           </Card>
         </Link>
@@ -116,7 +116,7 @@ export function LandingHero() {
                     className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm ${
                       selectedAnswer === "yes"
                         ? "border-accent text-accent-foreground scale-[1.02]"
-                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground active:bg-accent active:text-accent-foreground"
                     }`}
                   >
                     {selectedAnswer === "yes" && (
@@ -135,7 +135,7 @@ export function LandingHero() {
                     className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm ${
                       selectedAnswer === "no"
                         ? "border-accent text-accent-foreground scale-[1.02]"
-                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground active:bg-accent active:text-accent-foreground"
                     }`}
                   >
                     {selectedAnswer === "no" && (
@@ -163,7 +163,7 @@ export function LandingHero() {
                     </button>
                     <button
                       onClick={handleSkip}
-                      className="rounded-md border px-3 py-2 text-xs font-medium transition-colors border-input bg-background hover:bg-accent hover:text-accent-foreground sm:px-4 sm:text-sm"
+                      className="rounded-md border px-3 py-2 text-xs font-medium transition-colors border-input bg-background hover:bg-accent hover:text-accent-foreground active:bg-accent active:text-accent-foreground sm:px-4 sm:text-sm"
                     >
                       Skip
                     </button>
@@ -225,7 +225,7 @@ export function LandingHero() {
           <Card className="h-full flex flex-col justify-center p-6 shadow-none dark:bg-black sm:p-8 md:p-10 lg:p-4 min-h-[80px] sm:min-h-[100px] lg:min-h-0">
             <CardContent className="p-0 flex flex-col items-start justify-center">
               <p className="text-lg font-semibold sm:text-xl lg:text-2xl">
-                Available in the <span className="group-hover:italic">United States.</span>
+                Available in the <span className="group-hover:italic group-active:italic">United States.</span>
               </p>
             </CardContent>
           </Card>
@@ -245,10 +245,10 @@ export function LandingHero() {
 
         {/* Open-Source Data - Clickable Card - Full width on mobile and tablet, same row as Description on desktop */}
         <Link href="/dashboard/data" className="block h-full col-span-2 sm:col-span-2 lg:col-span-2 lg:row-span-1 lg:row-start-5 group">
-          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent dark:bg-black dark:hover:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
+          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
             <CardContent className="p-0">
               <span className="text-xl font-semibold sm:text-2xl lg:text-3xl">Open-Source Data</span>
-              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
+              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite] group-active:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
             </CardContent>
           </Card>
         </Link>
