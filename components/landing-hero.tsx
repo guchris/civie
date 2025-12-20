@@ -177,14 +177,14 @@ export function LandingHero() {
                   <EmptyMedia variant="icon">
                     <CheckCircle2 className="h-6 w-6 text-green-500" />
                   </EmptyMedia>
-                  <EmptyTitle>Response Submitted</EmptyTitle>
+                  <EmptyTitle>Example Response Submitted</EmptyTitle>
                   <EmptyDescription>
-                    You've answered today's question! Come back tomorrow to see results and answer the next question.
+                    This was an example question. Sign up to answer real questions and see anonymized results the next day.
                   </EmptyDescription>
                 </EmptyHeader>
                 <div className="mt-6">
                   <Button asChild variant="secondary">
-                    <Link href="/login">Login</Link>
+                    <Link href="/login">Get Started</Link>
                   </Button>
                 </div>
               </Empty>
@@ -194,14 +194,14 @@ export function LandingHero() {
                   <EmptyMedia variant="icon">
                     <XCircle className="h-6 w-6 text-muted-foreground" />
                   </EmptyMedia>
-                  <EmptyTitle>Question Skipped</EmptyTitle>
+                  <EmptyTitle>Example Question Skipped</EmptyTitle>
                   <EmptyDescription>
-                    You've skipped today's question. Come back tomorrow for a new question.
+                    This was an example question. Sign up to answer real questions and see anonymized results the next day.
                   </EmptyDescription>
                 </EmptyHeader>
                 <div className="mt-6">
                   <Button asChild variant="secondary">
-                    <Link href="/login">Login</Link>
+                    <Link href="/login">Get Started</Link>
                   </Button>
                 </div>
               </Empty>
