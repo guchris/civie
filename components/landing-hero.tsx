@@ -9,7 +9,7 @@ import { PrivacyCard } from "@/components/privacy-card";
 import { AnimatedLogo } from "@/components/animated-logo";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 
 const exampleQuestion = {
   propNumber: "50",
@@ -27,39 +27,6 @@ export function LandingHero() {
   const [isLogoActive, setIsLogoActive] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "submitted" | "skipped">("idle");
-  const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
-  const cardRefs = useRef<(HTMLElement | null)[]>([]);
-
-  // Intersection Observer for fade-in animations
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-
-    cardRefs.current.forEach((card, index) => {
-      if (!card) return;
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setVisibleCards((prev) => new Set(prev).add(index));
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        {
-          threshold: 0.1,
-          rootMargin: "0px 0px -50px 0px",
-        }
-      );
-
-      observer.observe(card);
-      observers.push(observer);
-    });
-
-    return () => {
-      observers.forEach((observer) => observer.disconnect());
-    };
-  }, []);
 
   const handleAnswer = (answer: string) => {
     if (selectedAnswer === answer) {
@@ -84,12 +51,7 @@ export function LandingHero() {
       <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-6 lg:gap-8">
         {/* Brand Card - Large square */}
         <Card
-          ref={(el) => {
-            cardRefs.current[0] = el;
-          }}
-          className={`flex items-center justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-12 md:p-16 lg:p-6 lg:col-span-2 lg:row-span-2 cursor-pointer min-h-[200px] sm:min-h-[250px] lg:min-h-0 transition-opacity duration-700 ${
-            visibleCards.has(0) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
+          className="flex items-center justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-12 md:p-16 lg:p-6 lg:col-span-2 lg:row-span-2 cursor-pointer min-h-[200px] sm:min-h-[250px] lg:min-h-0"
           onMouseEnter={() => setIsLogoActive(true)}
           onMouseLeave={() => setIsLogoActive(false)}
           onTouchStart={() => setIsLogoActive(true)}
@@ -101,14 +63,7 @@ export function LandingHero() {
         </Card>
 
         {/* Main Headline Card - Wide */}
-        <Card
-          ref={(el) => {
-            cardRefs.current[1] = el;
-          }}
-          className={`flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 lg:p-6 lg:col-span-2 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group transition-opacity duration-700 delay-100 ${
-            visibleCards.has(1) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
-        >
+        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 lg:p-6 lg:col-span-2 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group">
           <CardContent className="p-0">
             <h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl relative inline-block">
               Your say, every day.
@@ -118,14 +73,7 @@ export function LandingHero() {
         </Card>
 
         {/* Anonymous Dialogue Card - Medium */}
-        <Card
-          ref={(el) => {
-            cardRefs.current[2] = el;
-          }}
-          className={`flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-1 sm:col-span-1 sm:p-10 md:p-12 lg:p-6 lg:col-span-1 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group transition-opacity duration-700 delay-150 ${
-            visibleCards.has(2) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
-        >
+        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-1 sm:col-span-1 sm:p-10 md:p-12 lg:p-6 lg:col-span-1 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group">
           <CardContent className="p-0">
             <p className="text-lg font-bold sm:text-2xl">
               <span className="transition-all duration-300 group-hover:blur-[2px] group-active:blur-[2px]">Anonymous</span> civic dialogue.
@@ -134,15 +82,7 @@ export function LandingHero() {
         </Card>
 
         {/* Login Card - Replaces Privacy/Theme position */}
-        <Link
-          href="/login"
-          ref={(el) => {
-            cardRefs.current[3] = el;
-          }}
-          className={`block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 group transition-opacity duration-700 delay-200 ${
-            visibleCards.has(3) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
-        >
+        <Link href="/login" className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 group">
           <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
             <CardContent className="p-0 flex flex-col items-start gap-2">
               <span className="text-xl font-bold sm:text-2xl lg:text-3xl">Login</span>
@@ -153,14 +93,7 @@ export function LandingHero() {
         </Link>
 
         {/* Example Question Card - Large wide */}
-        <Card
-          ref={(el) => {
-            cardRefs.current[4] = el;
-          }}
-          className={`flex flex-col shadow-none dark:bg-black col-span-2 sm:col-span-2 lg:col-span-3 lg:row-span-2 min-h-[250px] sm:min-h-[300px] lg:min-h-0 transition-opacity duration-700 delay-300 ${
-            visibleCards.has(4) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
-        >
+        <Card className="flex flex-col shadow-none dark:bg-black col-span-2 sm:col-span-2 lg:col-span-3 lg:row-span-2 min-h-[250px] sm:min-h-[300px] lg:min-h-0">
           <CardHeader>
             <div className="flex items-center justify-between mb-2">
               <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
@@ -277,14 +210,7 @@ export function LandingHero() {
         </Card>
 
         {/* Privacy, Theme Cards - Moved to where Login was */}
-        <div
-          ref={(el) => {
-            cardRefs.current[5] = el;
-          }}
-          className={`col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-3 grid grid-cols-2 grid-rows-1 gap-4 sm:gap-6 lg:gap-8 transition-opacity duration-700 delay-400 ${
-            visibleCards.has(5) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
-        >
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-3 grid grid-cols-2 grid-rows-1 gap-4 sm:gap-6 lg:gap-8">
           {/* Privacy Card */}
           <div className="h-full">
             <PrivacyCard />
@@ -296,16 +222,11 @@ export function LandingHero() {
         </div>
 
         {/* Waitlist Card */}
-        <a
-          href="https://docs.google.com/forms/d/e/1FAIpQLSeYSquOqcAmSwOrgbqj5w4WXyjNXVbElp0HXJc_VyuK3iTU5Q/viewform?usp=header"
-          target="_blank"
+        <a 
+          href="https://docs.google.com/forms/d/e/1FAIpQLSeYSquOqcAmSwOrgbqj5w4WXyjNXVbElp0HXJc_VyuK3iTU5Q/viewform?usp=header" 
+          target="_blank" 
           rel="noopener noreferrer"
-          ref={(el) => {
-            cardRefs.current[6] = el;
-          }}
-          className={`block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-4 group transition-opacity duration-700 delay-500 ${
-            visibleCards.has(6) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
+          className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-4 group"
         >
           <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
             <CardContent className="p-0">
@@ -317,14 +238,7 @@ export function LandingHero() {
 
 
         {/* Description Card - Medium */}
-        <Card
-          ref={(el) => {
-            cardRefs.current[7] = el;
-          }}
-          className={`flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 lg:p-6 lg:col-span-2 lg:row-span-1 lg:row-start-5 min-h-[120px] sm:min-h-[140px] lg:min-h-0 transition-opacity duration-700 delay-600 ${
-            visibleCards.has(7) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
-        >
+        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 lg:p-6 lg:col-span-2 lg:row-span-1 lg:row-start-5 min-h-[120px] sm:min-h-[140px] lg:min-h-0">
           <CardContent className="p-0">
             <p className="text-sm leading-relaxed sm:text-base">
               A daily civic engagement platform that gives you a simple, low-effort way to
@@ -335,15 +249,7 @@ export function LandingHero() {
         </Card>
 
         {/* Open-Source Data - Clickable Card - Full width on mobile and tablet, same row as Description on desktop */}
-        <Link
-          href="/dashboard/data"
-          ref={(el) => {
-            cardRefs.current[8] = el;
-          }}
-          className={`block h-full col-span-2 sm:col-span-2 lg:col-span-2 lg:row-span-1 lg:row-start-5 group transition-opacity duration-700 delay-700 ${
-            visibleCards.has(8) ? "opacity-100 animate-[fadeInUp_0.6s_ease-out]" : "opacity-0"
-          }`}
-        >
+        <Link href="/dashboard/data" className="block h-full col-span-2 sm:col-span-2 lg:col-span-2 lg:row-span-1 lg:row-start-5 group">
           <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
             <CardContent className="p-0">
               <span className="text-xl font-semibold sm:text-2xl lg:text-3xl">Open-Source Data</span>
