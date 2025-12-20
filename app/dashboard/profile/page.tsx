@@ -16,16 +16,19 @@ import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from "@/lib/firebas
 import { format } from "date-fns";
 import { useUserData, UserData } from "@/hooks/use-user-data";
 import { calculateUserStats } from "@/lib/question-utils";
+import { useTheme } from "next-themes";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { userData: hookUserData, loading: hookLoading } = useUserData();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [editingZipCode, setEditingZipCode] = useState(false);
   const [zipCodeValue, setZipCodeValue] = useState("");
   const [savingZipCode, setSavingZipCode] = useState(false);
+  const [themeMounted, setThemeMounted] = useState(false);
   
   // Notification preferences state (default to all enabled)
   const [notifications, setNotifications] = useState({
@@ -38,6 +41,11 @@ export default function ProfilePage() {
       dailyReminder: true,
     },
   });
+
+  // Handle theme mounting
+  useEffect(() => {
+    setThemeMounted(true);
+  }, []);
 
   // Fetch user data from Firestore
   useEffect(() => {
@@ -471,6 +479,35 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
+          <Card className="shadow-none">
+            <CardHeader>
+              <CardTitle>Theme</CardTitle>
+              <CardDescription>
+                Choose your preferred color scheme
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="theme-toggle" className="text-sm font-normal cursor-pointer">
+                    Dark mode
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Switch between light and dark theme
+                  </p>
+                </div>
+                <Switch
+                  id="theme-toggle"
+                  checked={themeMounted && (resolvedTheme === "dark" || theme === "dark")}
+                  onCheckedChange={(checked) => {
+                    setTheme(checked ? "dark" : "light");
+                  }}
+                  disabled={!themeMounted}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="shadow-none">
             <CardHeader>
                 <CardTitle>Notifications</CardTitle>
