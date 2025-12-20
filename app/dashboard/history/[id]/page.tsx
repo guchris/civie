@@ -329,6 +329,40 @@ export default function QuestionDetailPage() {
     },
   };
 
+  // Calculate winner and margin
+  const winnerData = useMemo(() => {
+    if (!chartData || !chartData.answerDistribution.length) return null;
+
+    // Filter out skip and sort by count (descending)
+    const nonSkipAnswers = chartData.answerDistribution
+      .filter((item) => item.answer !== "skip")
+      .sort((a, b) => b.count - a.count);
+
+    if (nonSkipAnswers.length === 0) return null;
+
+    const winner = nonSkipAnswers[0];
+    const secondPlace = nonSkipAnswers.length > 1 ? nonSkipAnswers[1] : null;
+
+    // Calculate margin
+    const marginPercentage = secondPlace
+      ? winner.percentage - secondPlace.percentage
+      : winner.percentage;
+    const marginCount = secondPlace
+      ? winner.count - secondPlace.count
+      : winner.count;
+
+    // Check for tie
+    const isTie = secondPlace && winner.count === secondPlace.count;
+
+    return {
+      winner,
+      secondPlace,
+      marginPercentage: Math.round(marginPercentage),
+      marginCount,
+      isTie,
+    };
+  }, [chartData]);
+
   if (loading || userLoading) {
     return (
       <div className="container mx-auto max-w-7xl flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -522,12 +556,32 @@ export default function QuestionDetailPage() {
           </CardContent>
         </Card>
 
+      {/* Winner and Margin Card */}
+      {winnerData && chartData && chartData.totalResponses > 0 && (
+        <Card className="shadow-none">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">Result</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {winnerData.isTie ? (
+              <p className="text-base sm:text-lg">
+                The results are tied between <span className="font-semibold">{winnerData.winner.label}</span> and <span className="font-semibold">{winnerData.secondPlace?.label}</span> at <span className="font-semibold">{winnerData.winner.percentage}%</span> each.
+              </p>
+            ) : (
+              <p className="text-base sm:text-lg">
+                The winning answer is <span className="font-semibold">{winnerData.winner.label}</span> with a margin of <span className="font-semibold">{winnerData.marginPercentage}%</span> (<span className="font-semibold">{winnerData.marginCount.toLocaleString()}</span> {winnerData.marginCount === 1 ? "vote" : "votes"}).
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Charts Section */}
       {chartData && chartData.totalResponses > 0 && (
         <>
           {/* Overall Distribution - Donut Chart */}
           <Card className="shadow-none">
-            <CardHeader className="pb-2">
+            <CardHeader>
               <CardTitle className="text-base font-semibold">Response Distribution</CardTitle>
               <CardDescription>Overall breakdown of responses</CardDescription>
             </CardHeader>
@@ -598,7 +652,7 @@ export default function QuestionDetailPage() {
             {/* Gender Breakdown */}
             {chartData.genderBreakdown.length > 0 && (
               <Card className="shadow-none">
-                <CardHeader className="pb-2">
+                <CardHeader>
                   <CardTitle className="text-base font-semibold">By Gender</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">How each gender group responded</CardDescription>
                 </CardHeader>
@@ -649,7 +703,7 @@ export default function QuestionDetailPage() {
             {/* Age Group Breakdown */}
             {chartData.ageBreakdown.length > 0 && (
               <Card className="shadow-none">
-                <CardHeader className="pb-2">
+                <CardHeader>
                   <CardTitle className="text-base font-semibold">By Age Group</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">How each age group responded</CardDescription>
                 </CardHeader>
@@ -698,7 +752,7 @@ export default function QuestionDetailPage() {
             {/* Race/Ethnicity Breakdown */}
             {chartData.raceBreakdown.length > 0 && (
               <Card className="shadow-none sm:col-span-2">
-                <CardHeader className="pb-2">
+                <CardHeader>
                   <CardTitle className="text-base font-semibold">By Race/Ethnicity</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">How each group responded</CardDescription>
                 </CardHeader>
@@ -750,7 +804,7 @@ export default function QuestionDetailPage() {
 
             {/* Response Timeline */}
             <Card className="shadow-none sm:col-span-2">
-              <CardHeader className="pb-2">
+              <CardHeader>
                 <CardTitle className="text-base font-semibold">Response Timeline</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">When responses were submitted</CardDescription>
               </CardHeader>
