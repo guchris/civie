@@ -749,13 +749,13 @@ export default function QuestionDetailPage() {
             )}
 
             {/* Response Timeline */}
-            <Card className="shadow-none">
+            <Card className="shadow-none sm:col-span-2">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold">Response Timeline</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">When responses were submitted</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer config={timelineConfig} className="aspect-[4/3] w-full">
+                <ChartContainer config={timelineConfig} className="aspect-[3/1] w-full">
                   <LineChart 
                     data={chartData.timeline} 
                     margin={{ left: 0, right: 8, top: 8, bottom: 0 }}
