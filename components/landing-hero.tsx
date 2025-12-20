@@ -13,7 +13,7 @@ import { useState } from "react";
 
 const exampleQuestion = {
   propNumber: "50",
-  title: "Authorizes temporary changes to congressional district maps in response to Texas' partisan redistricting. Legislative constitutional amendment.",
+  title: "Should California authorize temporary changes to congressional district maps in response to Texas' partisan redistricting?",
   date: "December 15, 2025",
   timeRemaining: "18 hours left",
   summary: "Requires temporary use of new congressional district maps through 2030. Directs independent Citizens Redistricting Commission to resume enacting congressional district maps in 2031. Establishes policy supporting nonpartisan redistricting commissions nationwide. Fiscal Impact: One-time costs to counties of up to a few million dollars statewide to update election materials to reflect new congressional district maps.",
