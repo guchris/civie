@@ -74,6 +74,38 @@ export function getTimeRemaining(): string {
 }
 
 /**
+ * Get time remaining in hours (as a number)
+ * Returns the number of hours remaining, or 0 if expired
+ */
+export function getTimeRemainingHours(): number {
+  const deadline = getQuestionDeadline();
+  const now = new Date();
+  const diffMs = deadline.getTime() - now.getTime();
+  
+  if (diffMs <= 0) {
+    return 0;
+  }
+  
+  return diffMs / (1000 * 60 * 60); // Return as decimal hours
+}
+
+/**
+ * Get color variant for time remaining badge
+ * Returns "success" for >12h, "warning" for 6-12h, "danger" for <6h, "expired" for 0
+ */
+export function getTimeRemainingVariant(hours: number): "success" | "warning" | "danger" | "expired" {
+  if (hours <= 0) {
+    return "expired";
+  } else if (hours < 6) {
+    return "danger";
+  } else if (hours < 12) {
+    return "warning";
+  } else {
+    return "success";
+  }
+}
+
+/**
  * Calculate age from birth date string (YYYY-MM-DD format)
  */
 export function calculateAge(birthDate: string): number {
