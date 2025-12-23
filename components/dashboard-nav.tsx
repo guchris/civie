@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Home, History, Database, User, LogOut, ChevronDown, Settings } from "lucide-react";
+import { Home, History, Database, User, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -46,12 +46,12 @@ export function DashboardNav() {
   const isAdminActive = pathname === "/admin" || pathname?.startsWith("/admin/");
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/dashboard" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold">civie</span>
+    <nav className="sticky top-0 z-50 w-full">
+      <div className="container mx-auto max-w-7xl flex h-16 items-center gap-2 px-4 sm:px-6 lg:px-8">
+        <Link href="/dashboard" className="flex items-center space-x-2 bg-white rounded-lg border px-4 h-10 flex-grow">
+          <span className="text-sm font-bold">civie</span>
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {navItems.map((item) => {
             // Skip Profile - we'll handle it separately with dropdown
             if (item.href === "/dashboard/profile") return null;
@@ -67,14 +67,13 @@ export function DashboardNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                  "flex items-center justify-center rounded-lg border px-4 h-10 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    ? "bg-black text-white"
+                    : "bg-white text-muted-foreground hover:bg-gray-100"
                 )}
               >
                 <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{item.label}</span>
               </Link>
             );
           })}
@@ -85,15 +84,13 @@ export function DashboardNav() {
               <Button
                 variant="ghost"
                 className={cn(
-                  "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                  "flex items-center justify-center rounded-lg border px-4 h-10 text-sm font-medium transition-colors",
                   isProfileActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    ? "bg-black text-white"
+                    : "bg-white text-muted-foreground hover:bg-gray-100"
                 )}
               >
                 <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Profile</span>
-                <ChevronDown className="h-3 w-3" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-48 p-1" align="end">
