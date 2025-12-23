@@ -36,7 +36,7 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-[#FAF8F5] dark:bg-background">
       <main className="flex-1">
         <LandingHero />
       </main>

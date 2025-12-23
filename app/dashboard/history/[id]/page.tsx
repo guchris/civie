@@ -3,7 +3,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { CheckCircle2, XCircle, ArrowLeft, Share2, Clock } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -476,16 +475,14 @@ export default function QuestionDetailPage() {
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       {/* Back Button and Share Button */}
       <div className="flex items-center justify-between mb-4">
-        <ButtonGroup>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => router.back()}
-            className="shadow-none"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </ButtonGroup>
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="shadow-none"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
         <Button
           variant="outline"
           size="icon"

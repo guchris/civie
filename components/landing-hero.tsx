@@ -47,11 +47,11 @@ export function LandingHero() {
   };
 
   return (
-    <section className="container mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-6 lg:gap-8">
+    <section className="container mx-auto max-w-4xl px-4 py-4 sm:px-6 sm:py-6">
+      <div className="grid grid-cols-2 gap-4 sm:gap-6">
         {/* Brand Card - Large square */}
         <Card
-          className="flex items-center justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-12 md:p-16 lg:p-6 lg:col-span-2 lg:row-span-2 cursor-pointer min-h-[200px] sm:min-h-[250px] lg:min-h-0"
+          className="flex items-center justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-12 md:p-16 cursor-pointer min-h-[200px] sm:min-h-[250px]"
           onMouseEnter={() => setIsLogoActive(true)}
           onMouseLeave={() => setIsLogoActive(false)}
           onTouchStart={() => setIsLogoActive(true)}
@@ -63,37 +63,37 @@ export function LandingHero() {
         </Card>
 
         {/* Main Headline Card - Wide */}
-        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 lg:p-6 lg:col-span-2 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group">
+        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 min-h-[120px] sm:min-h-[140px] group">
           <CardContent className="p-0">
             <h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl relative inline-block">
               Your say, every day.
-              <span className="absolute bottom-0 left-0 w-0 h-1 bg-foreground transition-all duration-500 ease-out group-hover:w-full group-active:w-full"></span>
+              <span className="absolute bottom-0 left-0 h-1 bg-foreground animate-[underlineLoop_3s_ease-in-out_infinite] [animation-delay:0s] group-hover:animate-none group-active:animate-none group-hover:w-full group-active:w-full transition-all duration-500 ease-out"></span>
             </h2>
           </CardContent>
         </Card>
 
         {/* Anonymous Dialogue Card - Medium */}
-        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-1 sm:col-span-1 sm:p-10 md:p-12 lg:p-6 lg:col-span-1 lg:row-span-1 min-h-[120px] sm:min-h-[140px] lg:min-h-0 group">
+        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-1 sm:col-span-1 sm:p-10 md:p-12 min-h-[120px] sm:min-h-[140px] group">
           <CardContent className="p-0">
             <p className="text-lg font-bold sm:text-2xl">
-              <span className="transition-all duration-300 group-hover:blur-[2px] group-active:blur-[2px]">Anonymous</span> civic dialogue.
+              <span className="animate-[blurPulse_3s_ease-in-out_infinite] [animation-delay:1.5s] group-hover:animate-none group-active:animate-none group-hover:blur-[2px] group-active:blur-[2px] transition-all duration-300">Anonymous</span> civic dialogue.
             </p>
           </CardContent>
         </Card>
 
         {/* Login Card - Replaces Privacy/Theme position */}
-        <Link href="/login" className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 group">
-          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
+        <Link href="/login" className="block h-full col-span-1 sm:col-span-1 group">
+          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 min-h-[120px] sm:min-h-[140px] relative">
             <CardContent className="p-0 flex flex-col items-start gap-2">
-              <span className="text-xl font-bold sm:text-2xl lg:text-3xl">Login</span>
+              <span className="text-xl font-bold sm:text-2xl md:text-3xl">Login</span>
               <Badge variant="secondary" className="text-xs">Private Beta</Badge>
-              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite] group-active:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
+              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 md:h-7 md:w-7 animate-[arrowFloat_2s_ease-in-out_infinite] [animation-delay:0.5s] group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite] group-active:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
             </CardContent>
           </Card>
         </Link>
 
         {/* Example Question Card - Large wide */}
-        <Card className="flex flex-col shadow-none dark:bg-black col-span-2 sm:col-span-2 lg:col-span-3 lg:row-span-2 min-h-[250px] sm:min-h-[300px] lg:min-h-0">
+        <Card className="flex flex-col shadow-none dark:bg-black col-span-2 sm:col-span-2 min-h-[250px] sm:min-h-[300px]">
           <CardHeader>
             <div className="flex items-center justify-between mb-2">
               <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
@@ -103,7 +103,7 @@ export function LandingHero() {
                 {exampleQuestion.timeRemaining}
               </Badge>
             </div>
-            <CardTitle className="text-base font-semibold leading-tight sm:text-xl lg:text-2xl">
+            <CardTitle className="text-base font-semibold leading-tight sm:text-xl md:text-2xl">
               {exampleQuestion.title}
             </CardTitle>
           </CardHeader>
@@ -210,7 +210,7 @@ export function LandingHero() {
         </Card>
 
         {/* Privacy, Theme Cards - Moved to where Login was */}
-        <div className="col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-3 grid grid-cols-2 grid-rows-1 gap-4 sm:gap-6 lg:gap-8">
+        <div className="col-span-1 sm:col-span-1 grid grid-cols-2 grid-rows-1 gap-4 sm:gap-6">
           {/* Privacy Card */}
           <div className="h-full">
             <PrivacyCard />
@@ -226,21 +226,21 @@ export function LandingHero() {
           href="https://docs.google.com/forms/d/e/1FAIpQLSeYSquOqcAmSwOrgbqj5w4WXyjNXVbElp0HXJc_VyuK3iTU5Q/viewform?usp=header" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="block h-full col-span-1 sm:col-span-1 lg:col-span-1 lg:row-span-1 lg:row-start-4 group"
+          className="block h-full col-span-1 sm:col-span-1 group"
         >
-          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
+          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 min-h-[120px] sm:min-h-[140px] relative">
             <CardContent className="p-0">
-              <span className="text-xl font-bold sm:text-2xl lg:text-3xl">Waitlist</span>
-              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite] group-active:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
+              <span className="text-xl font-bold sm:text-2xl md:text-3xl">Waitlist</span>
+              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 md:h-7 md:w-7 animate-[arrowFloat_2s_ease-in-out_infinite] [animation-delay:1s] group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite] group-active:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
             </CardContent>
           </Card>
         </a>
 
 
         {/* Description Card - Medium */}
-        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 lg:p-6 lg:col-span-2 lg:row-span-1 lg:row-start-5 min-h-[120px] sm:min-h-[140px] lg:min-h-0">
+        <Card className="flex flex-col justify-center p-8 shadow-none dark:bg-black col-span-2 sm:col-span-2 sm:p-10 md:p-12 min-h-[120px] sm:min-h-[140px]">
           <CardContent className="p-0">
-            <p className="text-sm leading-relaxed sm:text-base">
+            <p className="text-base leading-relaxed sm:text-lg md:text-xl">
               A daily civic engagement platform that gives you a simple, low-effort way to
               participate in democratic dialogue. Answer one question each day and unlock
               anonymized results the next day.
@@ -249,11 +249,11 @@ export function LandingHero() {
         </Card>
 
         {/* Open-Source Data - Clickable Card - Full width on mobile and tablet, same row as Description on desktop */}
-        <Link href="/dashboard/data" className="block h-full col-span-2 sm:col-span-2 lg:col-span-2 lg:row-span-1 lg:row-start-5 group">
-          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 lg:p-6 min-h-[120px] sm:min-h-[140px] lg:min-h-0 relative">
+        <Link href="/dashboard/data" className="block h-full col-span-2 sm:col-span-2 group">
+          <Card className="h-full flex flex-col justify-center p-8 shadow-none transition-all hover:bg-accent active:bg-accent dark:bg-black dark:hover:bg-accent dark:active:bg-accent cursor-pointer sm:p-10 md:p-12 min-h-[120px] sm:min-h-[140px] relative">
             <CardContent className="p-0">
-              <span className="text-xl font-semibold sm:text-2xl lg:text-3xl">Open-Source Data</span>
-              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 lg:h-7 lg:w-7 group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite] group-active:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
+              <span className="text-xl font-semibold sm:text-2xl md:text-3xl">Open-Source Data</span>
+              <ArrowUpRight className="absolute top-4 right-4 h-6 w-6 sm:h-8 sm:w-8 md:h-7 md:w-7 animate-[arrowFloat_2s_ease-in-out_infinite] [animation-delay:1.5s] group-hover:animate-[arrowSlideOut_1s_ease-in-out_infinite] group-active:animate-[arrowSlideOut_1s_ease-in-out_infinite]" />
             </CardContent>
           </Card>
         </Link>

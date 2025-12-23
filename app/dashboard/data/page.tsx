@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { db, collection, getDocs, query, orderBy } from "@/lib/firebase";
 import { QuestionData } from "@/lib/question-presets";
-import { format, parseISO, parse } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { getTodayQuestionDate } from "@/lib/question-utils";
@@ -67,7 +67,6 @@ export default function DataPage() {
   const [loading, setLoading] = useState(true);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [downloadingQuestion, setDownloadingQuestion] = useState<string | null>(null);
-  const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
 
   // Fetch all questions from Firebase (only past questions)
   useEffect(() => {
@@ -117,53 +116,6 @@ export default function DataPage() {
 
     fetchQuestions();
   }, []);
-
-  // Group questions by month
-  const groupedQuestions = useMemo(() => {
-    const grouped: Record<string, QuestionWithData[]> = {};
-    
-    questions.forEach((q) => {
-      const dateObj = parseISO(q.date);
-      const monthKey = format(dateObj, "yyyy-MM");
-      if (!grouped[monthKey]) {
-        grouped[monthKey] = [];
-      }
-      grouped[monthKey].push(q);
-    });
-
-    // Sort questions within each month descending (newest first)
-    Object.keys(grouped).forEach((key) => {
-      grouped[key].sort((a, b) => {
-        const dateA = parseISO(a.date);
-        const dateB = parseISO(b.date);
-        return dateB.getTime() - dateA.getTime();
-      });
-    });
-
-    // Sort months descending (newest first)
-    return Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a));
-  }, [questions]);
-
-  // Reset to first month when questions change
-  useEffect(() => {
-    setCurrentMonthIndex(0);
-  }, [questions]);
-
-  const currentMonth = groupedQuestions[currentMonthIndex];
-  const canGoBack = currentMonthIndex < groupedQuestions.length - 1;
-  const canGoForward = currentMonthIndex > 0;
-
-  const goToPreviousMonth = () => {
-    if (canGoBack) {
-      setCurrentMonthIndex(currentMonthIndex + 1);
-    }
-  };
-
-  const goToNextMonth = () => {
-    if (canGoForward) {
-      setCurrentMonthIndex(currentMonthIndex - 1);
-    }
-  };
 
   // Download all data as CSV (only past questions)
   const handleDownloadAll = async () => {
@@ -513,11 +465,11 @@ yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
                 All questions and responses in a single CSV file
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Button 
                 variant="outline" 
                 size="sm"
-                className="shadow-none w-full sm:w-auto"
+                className="shadow-none"
                 onClick={handleDownloadAll}
                 disabled={downloadingAll || questions.length === 0}
               >
@@ -551,87 +503,52 @@ yes,Yes,45,Non-binary,Asian,94102,2024-01-15T16:20:00.000Z`}
             <p className="text-sm text-muted-foreground text-center py-8">
               No questions available yet.
             </p>
-          ) : groupedQuestions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No questions available yet.
+          ) : (
+            questions.map((question) => {
+              const dateObj = parseISO(question.date);
+              const isDownloading = downloadingQuestion === question.date;
+              
+              return (
+                <div
+                  key={question.date}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-lg border p-4"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {format(dateObj, "MMMM d, yyyy")}
+                    </p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {question.question}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {question.responseCount} response{question.responseCount !== 1 ? "s" : ""}
             </p>
-          ) : currentMonth ? (
-            <div className="space-y-4">
-              {/* Month Navigation */}
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={goToPreviousMonth}
-                  disabled={!canGoBack}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <h2 className="text-lg font-semibold">
-                  {format(parse(currentMonth[0], "yyyy-MM", new Date()), "MMMM yyyy")}
-                </h2>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={goToNextMonth}
-                  disabled={!canGoForward}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Questions for current month */}
-              <div className="space-y-2">
-                {currentMonth[1].map((question) => {
-                  const dateObj = parseISO(question.date);
-                  const isDownloading = downloadingQuestion === question.date;
-                  const dayNumber = format(dateObj, "d");
-                  
-                  return (
-                    <div
-                      key={question.date}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border p-4"
+          </div>
+                  <div className="flex items-center gap-2 flex-shrink-0 sm:ml-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="shadow-none"
+                      onClick={() => handleDownloadQuestion(question)}
+                      disabled={isDownloading || question.responseCount === 0}
                     >
-                      <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <span className="text-sm font-medium text-muted-foreground w-6 shrink-0">
-                          {dayNumber}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-foreground line-clamp-2 mb-1">
-                            {question.question}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {question.responseCount} response{question.responseCount !== 1 ? "s" : ""}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0 sm:ml-4 w-full sm:w-auto">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="shadow-none w-full sm:w-auto"
-                          onClick={() => handleDownloadQuestion(question)}
-                          disabled={isDownloading || question.responseCount === 0}
-                        >
-                          {isDownloading ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Downloading...
-                            </>
-                          ) : (
-                            <>
-                              <Download className="h-4 w-4 mr-2" />
-                              Download
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
+                      {isDownloading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Downloading...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </>
+                      )}
+                    </Button>
+                  </div>
+          </div>
+              );
+            })
+          )}
         </CardContent>
       </Card>
     </div>

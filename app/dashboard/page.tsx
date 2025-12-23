@@ -14,43 +14,11 @@ import { useUserData } from "@/hooks/use-user-data";
 import { 
   getTodayQuestionDate, 
   getTimeRemaining, 
-  getTimeRemainingHours,
-  getTimeRemainingVariant,
   formatQuestionDate,
   calculateAge 
 } from "@/lib/question-utils";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
-
-function TimeRemainingDisplay({
-  timeRemaining,
-  hours,
-}: {
-  timeRemaining: string;
-  hours: number;
-}) {
-  const variant = getTimeRemainingVariant(hours);
-  
-  const variantStyles = {
-    success: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20",
-    warning: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20",
-    danger: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
-    expired: "bg-muted text-muted-foreground border-muted",
-  };
-
-  return (
-    <Badge 
-      variant="outline" 
-      className={cn(
-        "text-xs font-medium px-2.5 py-1 border",
-        variantStyles[variant]
-      )}
-    >
-      {timeRemaining}
-    </Badge>
-  );
-}
 
 function WelcomeBanner({ 
   hasSeenWelcome, 
@@ -129,19 +97,15 @@ export default function DashboardHome() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "submitted" | "skipped" | "submitting">("idle");
   const [timeRemaining, setTimeRemaining] = useState<string>("");
-  const [timeRemainingHours, setTimeRemainingHours] = useState<number>(0);
   const [hasSeenWelcome, setHasSeenWelcome] = useState<boolean>(true); // Default to true to prevent flash
   const todayDate = getTodayQuestionDate();
 
   // Update time remaining every minute
   useEffect(() => {
-    const updateTimeRemaining = () => {
+    setTimeRemaining(getTimeRemaining());
+    const interval = setInterval(() => {
       setTimeRemaining(getTimeRemaining());
-      setTimeRemainingHours(getTimeRemainingHours());
-    };
-    
-    updateTimeRemaining();
-    const interval = setInterval(updateTimeRemaining, 60000); // Update every minute
+    }, 60000); // Update every minute
 
     return () => clearInterval(interval);
   }, []);
@@ -359,10 +323,9 @@ export default function DashboardHome() {
             <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
               Question for {formattedDate}
             </CardDescription>
-            <TimeRemainingDisplay 
-              timeRemaining={timeRemaining}
-              hours={timeRemainingHours}
-            />
+            <Badge variant="secondary" className="text-xs">
+              {timeRemaining}
+            </Badge>
           </div>
           <CardTitle className="text-base font-semibold leading-tight sm:text-xl lg:text-2xl">
             {question.question}

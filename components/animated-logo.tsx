@@ -21,7 +21,7 @@ export function AnimatedLogo({ isActive = false }: AnimatedLogoProps) {
   }, [isActive]);
 
   return (
-    <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl flex">
+    <h1 className="text-4xl font-bold tracking-tight sm:text-7xl flex">
       {letters.map((letter, index) => (
         <span
           key={`${animationKey}-${index}`}
