@@ -91,17 +91,19 @@ export function getTimeRemainingHours(): number {
 
 /**
  * Get color variant for time remaining badge
- * Returns "success" for >12h, "warning" for 6-12h, "danger" for <6h, "expired" for 0
+ * Returns "red" for 0-6h, "orange" for 6-12h, "yellow" for 12-18h, "gray" for 18+h
  */
-export function getTimeRemainingVariant(hours: number): "success" | "warning" | "danger" | "expired" {
+export function getTimeRemainingVariant(hours: number): "red" | "orange" | "yellow" | "gray" {
   if (hours <= 0) {
-    return "expired";
+    return "red";
   } else if (hours < 6) {
-    return "danger";
+    return "red";
   } else if (hours < 12) {
-    return "warning";
+    return "orange";
+  } else if (hours < 18) {
+    return "yellow";
   } else {
-    return "success";
+    return "gray";
   }
 }
 

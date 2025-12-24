@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { X, Check } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -13,6 +14,8 @@ import { useUserData } from "@/hooks/use-user-data";
 import { 
   getTodayQuestionDate, 
   getTimeRemaining, 
+  getTimeRemainingHours,
+  getTimeRemainingVariant,
   formatQuestionDate,
   calculateAge,
   calculateUserStats
@@ -97,14 +100,17 @@ export default function DashboardHome() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "submitted" | "skipped" | "submitting">("idle");
   const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [timeRemainingHours, setTimeRemainingHours] = useState<number>(0);
   const [hasSeenWelcome, setHasSeenWelcome] = useState<boolean>(true); // Default to true to prevent flash
   const todayDate = getTodayQuestionDate();
 
   // Update time remaining every minute
   useEffect(() => {
     setTimeRemaining(getTimeRemaining());
+    setTimeRemainingHours(getTimeRemainingHours());
     const interval = setInterval(() => {
       setTimeRemaining(getTimeRemaining());
+      setTimeRemainingHours(getTimeRemainingHours());
     }, 60000); // Update every minute
 
     return () => clearInterval(interval);
@@ -354,9 +360,23 @@ export default function DashboardHome() {
             <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
               Question for {formattedDate}
             </CardDescription>
-            <Badge variant="secondary" className="text-xs">
-              {timeRemaining}
-            </Badge>
+            {(() => {
+              const variant = getTimeRemainingVariant(timeRemainingHours);
+              const colorClasses = {
+                gray: "bg-gray-500 text-white border-transparent",
+                yellow: "bg-yellow-500 text-white border-transparent",
+                orange: "bg-orange-500 text-white border-transparent",
+                red: "bg-red-500 text-white border-transparent",
+              };
+              return (
+                <Badge 
+                  variant="outline"
+                  className={`text-xs border-transparent ${colorClasses[variant]}`}
+                >
+                  {timeRemaining}
+                </Badge>
+              );
+            })()}
           </div>
           <CardTitle className="text-base font-semibold leading-tight sm:text-xl lg:text-2xl">
             {question.question}

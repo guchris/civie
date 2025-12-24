@@ -8,14 +8,13 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, Shield, Flame, Loader2 } from "lucide-react";
+import { CheckCircle2, Shield, Loader2 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from "@/lib/firebase";
 import { format } from "date-fns";
 import { useUserData, UserData } from "@/hooks/use-user-data";
-import { calculateUserStats } from "@/lib/question-utils";
 import { useTheme } from "next-themes";
 
 export default function ProfilePage() {
@@ -272,9 +271,6 @@ export default function ProfilePage() {
     return raceMap[raceEthnicity] || raceEthnicity;
   };
 
-  // Calculate stats from user answers
-  const userStats = calculateUserStats(hookUserData?.answers);
-
   if (loading || hookLoading) {
     return (
       <div className="container mx-auto max-w-7xl flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -288,37 +284,11 @@ export default function ProfilePage() {
         <h1 className="text-xl font-bold tracking-tight">Profile</h1>
       </div>
 
-      <Tabs defaultValue="stats" className="space-y-6">
+      <Tabs defaultValue="identity" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="stats">Stats</TabsTrigger>
           <TabsTrigger value="identity">Identity</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="stats" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card className="shadow-none">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-                <Flame className="h-4 w-4 text-orange-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userStats.streak} days</div>
-                <p className="text-xs text-muted-foreground">Keep it going!</p>
-              </CardContent>
-            </Card>
-            <Card className="shadow-none">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Answered</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userStats.totalAnswered}</div>
-                <p className="text-xs text-muted-foreground">Questions engaged with</p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
 
         <TabsContent value="identity" className="space-y-4">
           <Card className="shadow-none">

@@ -89,6 +89,7 @@ export default function QuestionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [responses, setResponses] = useState<ResponseData[]>([]);
   const [skipCount, setSkipCount] = useState(0);
+  const [userAnswerId, setUserAnswerId] = useState<string | null>(null);
 
   // The questionId is now directly the date (YYYY-MM-DD format)
   const date = questionId;
@@ -119,6 +120,14 @@ export default function QuestionDetailPage() {
           if (userAnswer) {
             setAnswered(userAnswer.status === "answered");
             setSkipped(userAnswer.status === "skipped");
+            // Store the user's answer option ID if they answered
+            if (userAnswer.status === "answered" && userAnswer.answerOptionId) {
+              setUserAnswerId(userAnswer.answerOptionId);
+            } else {
+              setUserAnswerId(null);
+            }
+          } else {
+            setUserAnswerId(null);
           }
 
           // Fetch responses for aggregation
@@ -477,16 +486,16 @@ export default function QuestionDetailPage() {
       <div className="flex items-center justify-between mb-4">
         <Button
           variant="outline"
+          size="icon"
           onClick={() => router.back()}
-          className="shadow-none"
+          className="shadow-none bg-card dark:bg-card hover:bg-accent"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <Button
           variant="outline"
           size="icon"
-          className="shadow-none"
+          className="shadow-none bg-card dark:bg-card hover:bg-accent"
           disabled
         >
           <Share2 className="h-4 w-4" />
@@ -528,7 +537,9 @@ export default function QuestionDetailPage() {
           {chartData && chartData.answerDistribution.length > 0 && (
             <div className="space-y-2">
               <div className="flex flex-col gap-2">
-                {chartData.answerDistribution.map((item) => (
+                {chartData.answerDistribution.map((item) => {
+                  const isUserAnswer = userAnswerId === item.answer;
+                  return (
                       <div
                     key={item.answer}
                         className="relative w-full rounded-md border overflow-hidden px-3 py-2 text-xs font-medium sm:px-4 sm:text-sm border-input bg-background"
@@ -540,11 +551,19 @@ export default function QuestionDetailPage() {
                         />
                         {/* Content */}
                         <div className="relative flex items-center justify-between z-10">
-                      <span>{item.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span>{item.label}</span>
+                        {isUserAnswer && (
+                          <Badge variant="secondary" className="text-xs">
+                            You
+                          </Badge>
+                        )}
+                      </div>
                       <span className="text-muted-foreground">{item.percentage}%</span>
                         </div>
                 </div>
-                ))}
+                  );
+                })}
               </div>
               {chartData.totalResponses > 0 && (
                 <p className="text-xs text-muted-foreground mt-3">
