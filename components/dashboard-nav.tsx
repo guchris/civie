@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Home, History, Database, User, LogOut, ChevronDown, Settings } from "lucide-react";
+import { Home, History, Database, User, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,6 @@ export function DashboardNav() {
               >
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Profile</span>
-                <ChevronDown className="h-3 w-3" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-48 p-1" align="end">
