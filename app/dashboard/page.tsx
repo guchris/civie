@@ -2,9 +2,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, X, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -15,7 +14,8 @@ import {
   getTodayQuestionDate, 
   getTimeRemaining, 
   formatQuestionDate,
-  calculateAge 
+  calculateAge,
+  calculateUserStats
 } from "@/lib/question-utils";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
@@ -306,6 +306,13 @@ export default function DashboardHome() {
 
   const formattedDate = formatQuestionDate(todayDate);
 
+  // Get the user's selected answer if they've already answered
+  const userAnswer = userData?.answers?.[todayDate];
+  const submittedAnswerId = userAnswer?.status === "answered" ? userAnswer.answerOptionId : null;
+
+  // Calculate user stats
+  const userStats = calculateUserStats(userData?.answers);
+
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       {/* Welcome Banner */}
@@ -315,6 +322,30 @@ export default function DashboardHome() {
           onDismiss={handleDismissWelcomeBanner}
         />
       </Suspense>
+
+      {/* Stats Buttons */}
+      <div className="flex gap-4">
+        <Button
+          variant="outline"
+          className="bg-card border shadow-none cursor-default hover:bg-card justify-start"
+          onClick={(e) => e.preventDefault()}
+        >
+          <span className="text-sm font-medium">Streak</span>
+          <Badge variant="secondary" className="ml-2">
+            {userStats.streak}
+          </Badge>
+        </Button>
+        <Button
+          variant="outline"
+          className="bg-card border shadow-none cursor-default hover:bg-card justify-start"
+          onClick={(e) => e.preventDefault()}
+        >
+          <span className="text-sm font-medium">Total</span>
+          <Badge variant="secondary" className="ml-2">
+            {userStats.totalAnswered}
+          </Badge>
+        </Button>
+      </div>
 
       {/* Today's Question */}
       <Card className="shadow-none">
@@ -390,41 +421,39 @@ export default function DashboardHome() {
                 </div>
               </div>
             </>
-          ) : status === "submitted" ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <CheckCircle2 className="h-6 w-6 text-green-500" />
-                </EmptyMedia>
-                <EmptyTitle>Response Submitted</EmptyTitle>
-                <EmptyDescription>
-                  You've answered today's question! Come back tomorrow to see results and answer the next question.
-                </EmptyDescription>
-              </EmptyHeader>
-              <div className="mt-6">
-                <Button asChild variant="secondary">
-                  <Link href="/dashboard/history">View History</Link>
-                </Button>
+          ) : (
+            <>
+              {/* Show question card with answer options (read-only) when already answered/skipped */}
+              <div className="flex flex-col gap-2 py-2">
+                {question.answerOptions
+                  .sort((a, b) => a.order - b.order)
+                  .map((option) => {
+                    const isSelected = submittedAnswerId === option.id;
+                    return (
+                      <div
+                        key={option.id}
+                        className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm ${
+                          isSelected
+                            ? "border-accent text-accent-foreground scale-[1.02]"
+                            : "border-input bg-muted/30 opacity-60"
+                        }`}
+                      >
+                        {isSelected && (
+                          <>
+                            <div className="absolute inset-0 bg-accent origin-left" />
+                            <div className="relative flex items-center gap-2">
+                              <Check className="h-4 w-4" />
+                              <span>{option.label}</span>
+                            </div>
+                          </>
+                        )}
+                        {!isSelected && <span>{option.label}</span>}
+                      </div>
+                    );
+                  })}
               </div>
-            </Empty>
-          ) : status === "skipped" ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <XCircle className="h-6 w-6 text-muted-foreground" />
-                </EmptyMedia>
-                <EmptyTitle>Question Skipped</EmptyTitle>
-                <EmptyDescription>
-                  You've skipped today's question. Come back tomorrow for a new question.
-                </EmptyDescription>
-              </EmptyHeader>
-              <div className="mt-6">
-                <Button asChild variant="secondary">
-                  <Link href="/dashboard/history">View History</Link>
-                </Button>
-              </div>
-            </Empty>
-          ) : null}
+            </>
+          )}
         </CardContent>
       </Card>
 
