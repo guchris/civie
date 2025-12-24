@@ -358,7 +358,7 @@ export default function DashboardHome() {
         <CardHeader>
           <div className="flex items-center justify-between mb-2">
             <CardDescription className="text-xs font-medium uppercase tracking-wide sm:text-sm">
-              Question for {formattedDate}
+              Today's Question
             </CardDescription>
             {(() => {
               const variant = getTimeRemainingVariant(timeRemainingHours);
@@ -412,7 +412,14 @@ export default function DashboardHome() {
                       {selectedAnswer !== option.id && <span>{option.label}</span>}
                 </button>
                   ))}
-                <div className="flex gap-2 items-center">
+                <button
+                  onClick={handleSkip}
+                  disabled={status === "submitting"}
+                  className="relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm disabled:opacity-50 border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                >
+                  <span>Skip</span>
+                </button>
+                <div className="flex gap-2 items-center mt-2">
                   <button
                     onClick={handleSubmit}
                     disabled={!selectedAnswer || status === "submitting"}
@@ -430,13 +437,6 @@ export default function DashboardHome() {
                     ) : (
                       "Submit"
                     )}
-                  </button>
-                  <button
-                    onClick={handleSkip}
-                    disabled={status === "submitting"}
-                    className="rounded-md border px-3 py-2 text-xs font-medium transition-colors border-input bg-background hover:bg-accent hover:text-accent-foreground sm:px-4 sm:text-sm disabled:opacity-50"
-                  >
-                    Skip
                   </button>
                 </div>
               </div>
@@ -471,7 +471,31 @@ export default function DashboardHome() {
                       </div>
                     );
                   })}
+                <div
+                  className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm ${
+                    status === "skipped"
+                      ? "border-accent text-accent-foreground scale-[1.02]"
+                      : "border-input bg-muted/30 opacity-60"
+                  }`}
+                >
+                  {status === "skipped" ? (
+                    <>
+                      <div className="absolute inset-0 bg-accent origin-left" />
+                      <div className="relative flex items-center gap-2">
+                        <Check className="h-4 w-4" />
+                        <span>Skip</span>
+                      </div>
+                    </>
+                  ) : (
+                    <span>Skip</span>
+                  )}
+                </div>
               </div>
+              {status === "submitted" && (
+                <p className="text-xs text-muted-foreground mt-4">
+                  Results unlock when voting closes.
+                </p>
+              )}
             </>
           )}
         </CardContent>
