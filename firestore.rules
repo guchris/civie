@@ -32,6 +32,12 @@ service cloud.firestore {
       allow read: if request.auth != null;
     }
     
+    // Mock collection - for test/demo page
+    // Anyone can read and write (for question display and count updates)
+    match /mock/{documentId} {
+      allow read, write: if true;
+    }
+    
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;

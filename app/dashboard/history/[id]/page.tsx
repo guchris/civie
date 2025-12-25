@@ -363,12 +363,19 @@ export default function QuestionDetailPage() {
     // Check for tie
     const isTie = secondPlace && winner.count === secondPlace.count;
 
+    // Get all winner IDs (for ties, include all answers with the same count as winner)
+    const winnerCount = winner.count;
+    const winnerIds = nonSkipAnswers
+      .filter((item) => item.count === winnerCount)
+      .map((item) => item.answer);
+
     return {
       winner,
       secondPlace,
       marginPercentage: Math.round(marginPercentage),
       marginCount,
       isTie,
+      winnerIds,
     };
   }, [chartData]);
 
@@ -539,6 +546,7 @@ export default function QuestionDetailPage() {
               <div className="flex flex-col gap-2">
                 {chartData.answerDistribution.map((item) => {
                   const isUserAnswer = userAnswerId === item.answer;
+                  const isWinner = winnerData && winnerData.winnerIds.includes(item.answer);
                   return (
                       <div
                     key={item.answer}
@@ -546,7 +554,9 @@ export default function QuestionDetailPage() {
                       >
                         {/* Animated fill bar */}
                         <div
-                          className="absolute inset-0 bg-accent origin-left transition-all duration-1000 ease-out"
+                          className={`absolute inset-0 origin-left transition-all duration-1000 ease-out ${
+                            isWinner ? "bg-amber-500/50" : "bg-accent"
+                          }`}
                       style={{ width: `${item.percentage}%` }}
                         />
                         {/* Content */}
