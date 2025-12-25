@@ -292,9 +292,15 @@ export default function TestPage() {
         <Card className="bg-gray-900 dark:bg-gray-950 border-gray-800 dark:border-gray-900 max-w-4xl w-full py-0">
           <CardContent className="p-8 sm:p-12">
             <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-6">Manifesto</h2>
-            <p className="text-2xl sm:text-3xl md:text-4xl font-mono text-white leading-relaxed mb-8">
-              Your voice matters. Your opinion counts. Stop waiting for someone else to speak up. This is your platform. Every day, we ask the questions that shape our future. Answer honestly. Share freely. Change starts with you.
-            </p>
+            <div className="text-lg sm:text-xl md:text-2xl font-mono text-white leading-relaxed mb-8">
+              <p>Democracy doesn&apos;t only happen on election day.</p>
+              <p>It happens every day.</p>
+              <p className="mt-6">Civie offers one question a day - answered anonymously, shared openly.</p>
+              <p className="mt-6">No performance.</p>
+              <p>No shouting.</p>
+              <p>Just real people, counted once, with results open to everyone.</p>
+              <p className="mt-6">Your say, every day.</p>
+            </div>
             <Button className="rounded-full bg-white text-gray-900 hover:bg-gray-100 dark:bg-white dark:text-gray-900" size="lg">
               Join Waitlist
             </Button>
@@ -434,64 +440,70 @@ export default function TestPage() {
         </Card>
 
         {/* Results Card */}
-        {resultsData && resultsData.total > 0 && (
-          <Card className="shadow-none max-w-4xl w-full">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold mb-2">Daily Results</CardTitle>
-              <CardDescription>
-                See how others responded to today&apos;s question
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {countsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Spinner />
-                </div>
-              ) : (
-                <>
-                  {/* Answer Options with Percentages */}
-                  <div className="space-y-2">
-                    <div className="flex flex-col gap-2">
-                      {resultsData.answerDistribution.map((item) => {
-                        const isUserAnswer = userAnswerId === item.answer;
-                        const isWinner = winnerData && winnerData.winnerIds.includes(item.answer);
-                        return (
-                          <div
-                            key={item.answer}
-                            className="relative w-full rounded-md border overflow-hidden px-3 py-2 text-xs font-medium sm:px-4 sm:text-sm border-input bg-background"
-                          >
-                            {/* Animated fill bar */}
-                            <div
-                              className={`absolute inset-0 origin-left transition-all duration-1000 ease-out ${
-                                isWinner ? "bg-amber-500/50" : "bg-accent"
-                              }`}
-                              style={{ width: `${item.percentage}%` }}
-                            />
-                            {/* Content */}
-                            <div className="relative flex items-center justify-between z-10">
-                              <div className="flex items-center gap-2">
-                                {isUserAnswer && (
-                                  <Check className="h-4 w-4" />
-                                )}
-                                <span>{item.label}</span>
-                              </div>
-                              <span className="text-muted-foreground">{item.percentage}%</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {resultsData.total > 0 && (
-                      <p className="text-xs text-muted-foreground mt-3">
-                        Based on {resultsData.total.toLocaleString()} {resultsData.total === 1 ? "response" : "responses"}
-                      </p>
-                    )}
+        <Card className="shadow-none max-w-4xl w-full">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold mb-2">Daily Results</CardTitle>
+            <CardDescription>
+              See how others responded to today&apos;s question
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(status === "submitted" || status === "skipped") && resultsData && resultsData.total > 0 ? (
+              <>
+                {countsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Spinner />
                   </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        )}
+                ) : (
+                  <>
+                    {/* Answer Options with Percentages */}
+                    <div className="space-y-2">
+                      <div className="flex flex-col gap-2">
+                        {resultsData.answerDistribution.map((item) => {
+                          const isUserAnswer = userAnswerId === item.answer;
+                          const isWinner = winnerData && winnerData.winnerIds.includes(item.answer);
+                          return (
+                            <div
+                              key={item.answer}
+                              className="relative w-full rounded-md border overflow-hidden px-3 py-2 text-xs font-medium sm:px-4 sm:text-sm border-input bg-background"
+                            >
+                              {/* Animated fill bar */}
+                              <div
+                                className={`absolute inset-0 origin-left transition-all duration-1000 ease-out ${
+                                  isWinner ? "bg-amber-500/50" : "bg-accent"
+                                }`}
+                                style={{ width: `${item.percentage}%` }}
+                              />
+                              {/* Content */}
+                              <div className="relative flex items-center justify-between z-10">
+                                <div className="flex items-center gap-2">
+                                  {isUserAnswer && (
+                                    <Check className="h-4 w-4" />
+                                  )}
+                                  <span>{item.label}</span>
+                                </div>
+                                <span className="text-muted-foreground">{item.percentage}%</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {resultsData.total > 0 && (
+                        <p className="text-xs text-muted-foreground mt-3">
+                          Based on {resultsData.total.toLocaleString()} {resultsData.total === 1 ? "response" : "responses"}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Answer the question above to see results
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
