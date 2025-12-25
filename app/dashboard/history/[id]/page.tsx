@@ -546,7 +546,7 @@ export default function QuestionDetailPage() {
                       >
                         {/* Animated fill bar */}
                         <div
-                          className="absolute inset-0 bg-primary/10 origin-left transition-all duration-1000 ease-out"
+                          className="absolute inset-0 bg-accent origin-left transition-all duration-1000 ease-out"
                       style={{ width: `${item.percentage}%` }}
                         />
                         {/* Content */}

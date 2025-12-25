@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,14 +9,18 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, Shield, Loader2 } from "lucide-react";
+import { CheckCircle2, Shield, Loader2, Flame, LogOut, Settings } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { isAdmin } from "@/lib/admin";
+import Link from "next/link";
 import { format } from "date-fns";
 import { useUserData, UserData } from "@/hooks/use-user-data";
 import { useTheme } from "next-themes";
+import { calculateUserStats } from "@/lib/question-utils";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -28,6 +33,7 @@ export default function ProfilePage() {
   const [zipCodeValue, setZipCodeValue] = useState("");
   const [savingZipCode, setSavingZipCode] = useState(false);
   const [themeMounted, setThemeMounted] = useState(false);
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
   
   // Notification preferences state (default to all enabled)
   const [notifications, setNotifications] = useState({
@@ -44,6 +50,15 @@ export default function ProfilePage() {
   // Handle theme mounting
   useEffect(() => {
     setThemeMounted(true);
+  }, []);
+
+  // Check admin status
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const adminStatus = await isAdmin();
+      setUserIsAdmin(adminStatus);
+    };
+    checkAdminStatus();
   }, []);
 
   // Fetch user data from Firestore
@@ -137,6 +152,15 @@ export default function ProfilePage() {
 
     return () => unsubscribe();
   }, [router, hookUserData]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   const handleUpdateZipCode = async () => {
     if (!isAuthenticated || !auth.currentUser) return;
@@ -271,6 +295,9 @@ export default function ProfilePage() {
     return raceMap[raceEthnicity] || raceEthnicity;
   };
 
+  // Calculate stats from user answers
+  const userStats = calculateUserStats(hookUserData?.answers);
+
   if (loading || hookLoading) {
     return (
       <div className="container mx-auto max-w-7xl flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -280,15 +307,51 @@ export default function ProfilePage() {
   }
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <div>
+      <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold tracking-tight">Profile</h1>
+        
+        {/* Action Buttons */}
+        <ButtonGroup>
+          {userIsAdmin && (
+            <Button variant="outline">
+              <Link href="/admin">
+                Admin
+              </Link>
+            </Button>
+          )}
+          <Button variant="outline" onClick={handleLogout}>
+            Log Out
+          </Button>
+        </ButtonGroup>
       </div>
 
-      <Tabs defaultValue="identity" className="space-y-6">
+      <Tabs defaultValue="badges" className="space-y-6">
         <TabsList>
+          <TabsTrigger value="badges">Badges</TabsTrigger>
           <TabsTrigger value="identity">Identity</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="badges" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="shadow-none bg-orange-500 border-orange-500">
+              <CardContent>
+                <div className="flex flex-col">
+                  <div className="text-5xl font-bold text-white mb-1">{userStats.streak}</div>
+                  <div className="text-xl font-bold text-white">day streak</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="shadow-none bg-blue-500 border-blue-500">
+              <CardContent>
+                <div className="flex flex-col">
+                  <div className="text-5xl font-bold text-white mb-1">{userStats.totalAnswered}</div>
+                  <div className="text-xl font-bold text-white">total answered</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         <TabsContent value="identity" className="space-y-4">
           <Card className="shadow-none">

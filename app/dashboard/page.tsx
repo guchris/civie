@@ -4,7 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyTitle, EmptyDescription } from "@/components/ui/empty";
-import { X, Check } from "lucide-react";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import { X, Check, CheckCircle2, ChevronRight } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -17,8 +24,7 @@ import {
   getTimeRemainingHours,
   getTimeRemainingVariant,
   formatQuestionDate,
-  calculateAge,
-  calculateUserStats
+  calculateAge
 } from "@/lib/question-utils";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
@@ -320,9 +326,6 @@ export default function DashboardHome() {
     ? selectedAnswer 
     : (userAnswer?.status === "answered" ? userAnswer.answerOptionId : null);
 
-  // Calculate user stats
-  const userStats = calculateUserStats(userData?.answers);
-
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       {/* Welcome Banner */}
@@ -333,29 +336,22 @@ export default function DashboardHome() {
         />
       </Suspense>
 
-      {/* Stats Buttons */}
-      <div className="flex gap-4">
-        <Button
-          variant="outline"
-          className="bg-card border shadow-none cursor-default hover:bg-card justify-start"
-          onClick={(e) => e.preventDefault()}
-        >
-          <span className="text-sm font-medium">Streak</span>
-          <Badge variant="secondary" className="ml-2">
-            {userStats.streak}
-          </Badge>
-        </Button>
-        <Button
-          variant="outline"
-          className="bg-card border shadow-none cursor-default hover:bg-card justify-start"
-          onClick={(e) => e.preventDefault()}
-        >
-          <span className="text-sm font-medium">Total</span>
-          <Badge variant="secondary" className="ml-2">
-            {userStats.totalAnswered}
-          </Badge>
-        </Button>
-      </div>
+      {/* Answer Submitted Notification */}
+      {status === "submitted" && (
+        <Item variant="outline" size="sm" asChild>
+          <Link href="/dashboard/history">
+            <ItemMedia>
+              <CheckCircle2 className="size-5" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>You've answered today's question.</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <ChevronRight className="size-4" />
+            </ItemActions>
+          </Link>
+        </Item>
+      )}
 
       {/* Today's Question */}
       <Card className="shadow-none">
@@ -456,9 +452,9 @@ export default function DashboardHome() {
                     return (
                       <div
                         key={option.id}
-                        className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm ${
+                        className={`relative w-full rounded-md border px-3 py-2 text-xs font-medium text-left overflow-hidden sm:px-4 sm:text-sm ${
                           isSelected
-                            ? "border-accent text-accent-foreground scale-[1.02]"
+                            ? "border-accent text-accent-foreground"
                             : "border-input bg-muted/30 opacity-60"
                         }`}
                       >

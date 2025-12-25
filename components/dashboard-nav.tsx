@@ -1,15 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Home, History, Database, User, LogOut, Settings } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Home, History, Database, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-import { isAdmin } from "@/lib/admin";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
@@ -20,30 +14,6 @@ const navItems = [
 
 export function DashboardNav() {
   const pathname = usePathname();
-  const router = useRouter();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [userIsAdmin, setUserIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      const adminStatus = await isAdmin();
-      setUserIsAdmin(adminStatus);
-    };
-    checkAdminStatus();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      setProfileDropdownOpen(false);
-      await signOut(auth);
-      router.push("/");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
-
-  const isProfileActive = pathname === "/dashboard/profile" || pathname?.startsWith("/dashboard/profile/");
-  const isAdminActive = pathname === "/admin" || pathname?.startsWith("/admin/");
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -53,9 +23,6 @@ export function DashboardNav() {
         </Link>
         <div className="flex items-center gap-1">
           {navItems.map((item) => {
-            // Skip Profile - we'll handle it separately with dropdown
-            if (item.href === "/dashboard/profile") return null;
-            
             const Icon = item.icon;
             // For Home, only match exact path. For others, match exact or sub-paths
             const isActive =
@@ -78,56 +45,6 @@ export function DashboardNav() {
               </Link>
             );
           })}
-          
-          {/* Profile Dropdown */}
-          <Popover open={profileDropdownOpen} onOpenChange={setProfileDropdownOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                  isProfileActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Profile</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-1" align="end">
-              <div className="flex flex-col">
-                <Link
-                  href="/dashboard/profile"
-                  onClick={() => setProfileDropdownOpen(false)}
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                >
-                  <User className="h-4 w-4" />
-                  View Profile
-                </Link>
-                {userIsAdmin && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
-                      isAdminActive && "bg-accent"
-                    )}
-                  >
-                    <Settings className="h-4 w-4" />
-                    View Admin
-                  </Link>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground text-left w-full"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Log out
-                </button>
-              </div>
-            </PopoverContent>
-          </Popover>
         </div>
       </div>
     </nav>
