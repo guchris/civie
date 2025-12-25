@@ -314,7 +314,11 @@ export default function DashboardHome() {
 
   // Get the user's selected answer if they've already answered
   const userAnswer = userData?.answers?.[todayDate];
-  const submittedAnswerId = userAnswer?.status === "answered" ? userAnswer.answerOptionId : null;
+  // Use selectedAnswer if we just submitted (status is submitted and we have selectedAnswer),
+  // otherwise use the answer from userData
+  const submittedAnswerId = status === "submitted" && selectedAnswer 
+    ? selectedAnswer 
+    : (userAnswer?.status === "answered" ? userAnswer.answerOptionId : null);
 
   // Calculate user stats
   const userStats = calculateUserStats(userData?.answers);
@@ -412,14 +416,7 @@ export default function DashboardHome() {
                       {selectedAnswer !== option.id && <span>{option.label}</span>}
                 </button>
                   ))}
-                <button
-                  onClick={handleSkip}
-                  disabled={status === "submitting"}
-                  className="relative w-full rounded-md border px-3 py-2 text-xs font-medium transition-all duration-300 text-left overflow-hidden sm:px-4 sm:text-sm disabled:opacity-50 border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                >
-                  <span>Skip</span>
-                </button>
-                <div className="flex gap-2 items-center mt-2">
+                <div className="flex gap-2 items-center">
                   <button
                     onClick={handleSubmit}
                     disabled={!selectedAnswer || status === "submitting"}
@@ -437,6 +434,13 @@ export default function DashboardHome() {
                     ) : (
                       "Submit"
                     )}
+                  </button>
+                  <button
+                    onClick={handleSkip}
+                    disabled={status === "submitting"}
+                    className="rounded-md border px-3 py-2 text-xs font-medium transition-colors border-input bg-background hover:bg-accent hover:text-accent-foreground sm:px-4 sm:text-sm disabled:opacity-50"
+                  >
+                    Skip
                   </button>
                 </div>
               </div>

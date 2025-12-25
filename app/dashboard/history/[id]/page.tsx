@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, ArrowLeft, Share2, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowLeft, Share2, Clock, Check } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
@@ -552,12 +552,10 @@ export default function QuestionDetailPage() {
                         {/* Content */}
                         <div className="relative flex items-center justify-between z-10">
                       <div className="flex items-center gap-2">
-                        <span>{item.label}</span>
                         {isUserAnswer && (
-                          <Badge variant="secondary" className="text-xs">
-                            You
-                          </Badge>
+                          <Check className="h-4 w-4" />
                         )}
+                        <span>{item.label}</span>
                       </div>
                       <span className="text-muted-foreground">{item.percentage}%</span>
                         </div>
