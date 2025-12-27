@@ -5,26 +5,18 @@ interface LogoProps {
 export function Logo({ className = "w-24 h-12" }: LogoProps) {
   return (
     <svg
+      width="150"
+      height="100"
+      viewBox="0 0 150 100"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 200 100"
       role="img"
       aria-label="Two overlapping circles with center knocked out"
       className={className}
     >
       <path
+        d="M50 0C59.1072 0 67.6456 2.43515 75 6.68945C60.055 15.3347 50 31.493 50 50C50 68.5068 60.0553 84.6643 75 93.3096C67.6455 97.564 59.1074 100 50 100C22.3858 100 0 77.6142 0 50C0 22.3858 22.3858 0 50 0ZM100 0C127.614 0 150 22.3858 150 50C150 77.6142 127.614 100 100 100C90.8926 100 82.3545 97.564 75 93.3096C89.9447 84.6643 100 68.5068 100 50C100 31.493 89.945 15.3347 75 6.68945C82.3544 2.43515 90.8928 0 100 0Z"
         fill="currentColor"
-        fillRule="evenodd"
-        d="
-          M 80 50
-          m -35 0
-          a 35 35 0 1 0 70 0
-          a 35 35 0 1 0 -70 0
-
-          M 115 50
-          m -35 0
-          a 35 35 0 1 0 70 0
-          a 35 35 0 1 0 -70 0
-        "
       />
     </svg>
   );

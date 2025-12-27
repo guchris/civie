@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, History, Database, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
@@ -16,10 +17,10 @@ export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/dashboard" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold">civie</span>
+        <Link href="/dashboard" className="flex items-center">
+          <Logo className="w-10 h-6" />
         </Link>
         <div className="flex items-center gap-1">
           {navItems.map((item) => {

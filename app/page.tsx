@@ -306,7 +306,7 @@ export default function Home() {
           <div className="flex items-center justify-center px-6 pt-6 relative">
             {/* Logo */}
             <div>
-              <Logo className="w-20 h-10" />
+              <Logo className="w-12 h-6" />
             </div>
           </div>
 
@@ -355,7 +355,7 @@ export default function Home() {
       </div>
 
       {/* Feature List */}
-      <div className="flex flex-col items-center gap-2 py-8">
+      <div className="flex flex-col items-center py-16">
         <p className="text-center leading-none hover:underline cursor-default">VERIFIED PEOPLE</p>
         <p className="text-center leading-none hover:underline cursor-default">DAILY QUESTIONS</p>
         <p className="text-center leading-none hover:underline cursor-default">ANONYMOUS ANSWERS</p>
@@ -366,8 +366,30 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-black text-white flex justify-center items-center py-8">
-        <Logo className="w-20 h-10" />
+      <footer className="bg-black text-white flex flex-col items-center py-16 gap-6">
+        <div className="flex flex-col items-center gap-2">
+          <Logo className="w-12 h-6" />
+          <p className="font-bold leading-none">CIVIE © 2026</p>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center">
+            <Link href="#" className="leading-none">ABOUT</Link>
+            <Link href="#" className="leading-none">MANIFESTO</Link>
+          </div>
+          <div className="flex flex-col items-center">
+            <Link href="#" className="leading-none">CAREERS</Link>
+            <Link href="#" className="leading-none">PRESS</Link>
+          </div>
+          <div className="flex flex-col items-center">
+            <Link href="#" className="leading-none">INSTAGRAM</Link>
+            <Link href="#" className="leading-none">TIKTOK</Link>
+            <Link href="#" className="leading-none">LINKEDIN</Link>
+          </div>
+          <div className="flex flex-col items-center">
+            <Link href="#" className="leading-none">TERMS</Link>
+            <Link href="#" className="leading-none">PRIVACY</Link>
+          </div>
+        </div>
       </footer>
     </div>
   );

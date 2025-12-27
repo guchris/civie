@@ -20,6 +20,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { Logo } from "@/components/logo";
 
 interface OTPFormProps extends React.ComponentProps<"div"> {
   phoneNumber?: string;
@@ -106,14 +107,11 @@ export function OTPForm({ className, phoneNumber: propPhoneNumber, ...props }: O
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form onSubmit={handleSubmit}>
         <FieldGroup>
-          <div className="flex flex-col items-center gap-2 text-center">
-            <Link
-              href="/"
-              className="flex flex-col items-center gap-2 font-medium"
-            >
-              <span className="text-2xl font-bold">civie</span>
+          <div className="flex flex-col items-center gap-4 text-center mb-6">
+            <Link href="/" className="flex flex-col items-center">
+              <Logo className="w-16 h-8" />
             </Link>
-            <h1 className="text-xl font-bold">Enter verification code</h1>
+            <h1 className="text-lg font-bold leading-none">Enter verification code</h1>
             <FieldDescription>
               We sent a 6-digit code to {phoneNumber || "your phone number"}
             </FieldDescription>

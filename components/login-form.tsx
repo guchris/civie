@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Check, Loader2 } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 export function LoginForm({
   className,
@@ -201,14 +202,11 @@ export function LoginForm({
       {recaptchaContainer}
       <form onSubmit={handlePhoneSubmit}>
         <FieldGroup>
-          <div className="flex flex-col items-center gap-2 text-center">
-            <Link
-              href="/"
-              className="flex flex-col items-center gap-2 font-medium"
-            >
-              <span className="text-2xl font-bold">civie</span>
+          <div className="flex flex-col items-center gap-4 mb-6">
+            <Link href="/" className="flex flex-col items-center">
+              <Logo className="w-12 h-6" />
             </Link>
-            <h1 className="text-xl font-bold">Welcome to civie</h1>
+            <h1 className="text-lg font-bold leading-none">Welcome to CIVIE</h1>
           </div>
           <Field>
             <FieldLabel htmlFor="betaCode">Beta Code</FieldLabel>
